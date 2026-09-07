@@ -21,10 +21,10 @@
     --polar-navy: 18 58 82;     /* #123A52 */
     --polar-night: 7 31 50;     /* #071F32 */
 
-    /* ---- Light — snow & glacier ---- */
-    --background: 247 251 253;
-    --surface: 255 255 255;
-    --surface-muted: 234 244 248;
+    /* ---- Light — ice white ---- */
+    --background: 255 255 255;      /* ice white */
+    --surface: 247 251 253;         /* snow — faintly-tinted raised surfaces */
+    --surface-muted: 233 242 248;   /* ice */
     --field: 255 255 255;
 
     --foreground: 18 52 74;          /* #12344A */
