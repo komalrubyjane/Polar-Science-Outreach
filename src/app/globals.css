@@ -1,0 +1,125 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 40% 99%;
+    --foreground: 214 60% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 214 60% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 214 60% 12%;
+
+    --primary: 209 63% 30%;
+    --primary-foreground: 200 100% 98%;
+
+    --secondary: 202 45% 94%;
+    --secondary-foreground: 209 63% 24%;
+
+    --muted: 210 30% 95%;
+    --muted-foreground: 214 15% 42%;
+
+    --accent: 190 70% 42%;
+    --accent-foreground: 200 100% 98%;
+
+    --destructive: 0 72% 46%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 24% 88%;
+    --input: 210 24% 86%;
+    --ring: 190 70% 42%;
+
+    --radius: 0.625rem;
+  }
+
+  .dark {
+    --background: 214 46% 8%;
+    --foreground: 200 30% 92%;
+
+    --card: 214 42% 11%;
+    --card-foreground: 200 30% 92%;
+
+    --popover: 214 42% 11%;
+    --popover-foreground: 200 30% 92%;
+
+    --primary: 195 70% 55%;
+    --primary-foreground: 214 60% 10%;
+
+    --secondary: 213 32% 18%;
+    --secondary-foreground: 200 30% 92%;
+
+    --muted: 213 30% 16%;
+    --muted-foreground: 210 16% 64%;
+
+    --accent: 187 65% 48%;
+    --accent-foreground: 214 60% 10%;
+
+    --destructive: 0 62% 52%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 213 28% 22%;
+    --input: 213 28% 24%;
+    --ring: 187 65% 48%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+  .prose-polar {
+    @apply max-w-none leading-relaxed text-foreground/90 [&_a]:text-accent [&_a:hover]:underline [&_h2]:mt-8 [&_h2]:text-xl [&_h2]:font-semibold [&_h3]:mt-6 [&_h3]:text-lg [&_h3]:font-semibold [&_p]:my-4 [&_ul]:my-4 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:my-4 [&_ol]:list-decimal [&_ol]:pl-6;
+  }
+  .aurora-bg {
+    background:
+      radial-gradient(60% 120% at 15% 10%, hsl(190 80% 45% / 0.28), transparent 60%),
+      radial-gradient(50% 100% at 85% 0%, hsl(160 70% 50% / 0.22), transparent 55%),
+      radial-gradient(80% 120% at 50% 100%, hsl(250 60% 60% / 0.18), transparent 60%),
+      hsl(var(--primary));
+    background-size: 180% 180%;
+  }
+}
+
+/* Skip link */
+.skip-link {
+  @apply sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground;
+}
+
+/* Leaflet container needs an explicit height and a dark-mode-friendly base */
+.leaflet-container {
+  @apply h-full w-full rounded-lg;
+  background: hsl(var(--muted));
+}
+.dark .leaflet-tile {
+  filter: brightness(0.85) contrast(1.05);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

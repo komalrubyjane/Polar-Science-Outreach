@@ -1,0 +1,53 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: polar
+      POSTGRES_PASSWORD: polar
+      POSTGRES_DB: polar_portal
+    ports:
+      - '5432:5432'
+    volumes:
+      - polar_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U polar -d polar_portal']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://polar:polar@db:5432/polar_portal?schema=public
+      DIRECT_URL: postgresql://polar:polar@db:5432/polar_portal?schema=public
+      AUTH_SECRET: ${AUTH_SECRET:-please-change-this-in-production-0000000000}
+      AUTH_TRUST_HOST: 'true'
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+      STORAGE_PROVIDER: local
+      LOCAL_STORAGE_DIR: /app/storage
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.com}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-ChangeThisPassword123!}
+      EDITOR_EMAIL: ${EDITOR_EMAIL:-editor@example.com}
+      EDITOR_PASSWORD: ${EDITOR_PASSWORD:-ChangeThisPassword123!}
+      RESEARCHER_EMAIL: ${RESEARCHER_EMAIL:-researcher@example.com}
+      RESEARCHER_PASSWORD: ${RESEARCHER_PASSWORD:-ChangeThisPassword123!}
+      USER_EMAIL: ${USER_EMAIL:-user@example.com}
+      USER_PASSWORD: ${USER_PASSWORD:-ChangeThisPassword123!}
+      # Set to "true" on first run to load demo content.
+      SEED_ON_START: ${SEED_ON_START:-false}
+    ports:
+      - '3000:3000'
+    volumes:
+      - polar_storage:/app/storage
+
+volumes:
+  polar_db:
+  polar_storage:

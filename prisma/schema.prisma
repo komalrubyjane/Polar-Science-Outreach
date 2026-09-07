@@ -1,0 +1,1176 @@
+// Integrated Polar Science Outreach, Knowledge Repository and Media Dissemination Portal
+// PostgreSQL schema — normalized, indexed, with content-workflow support.
+//
+// Full-text search is implemented in `src/lib/search` using PostgreSQL
+// `to_tsvector` / `plainto_tsquery`. Optional GIN indexes for performance are
+// added by `prisma/sql/fulltext.sql` (run `npm run db:fulltext`).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  // Used by `prisma migrate` / `prisma db push`. When pooling (e.g. Supabase
+  // PgBouncer / Supavisor) is in front of DATABASE_URL, point this at the
+  // direct 5432 connection. Falls back to DATABASE_URL when unset.
+  directUrl = env("DIRECT_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum Role {
+  USER
+  RESEARCHER
+  EDITOR
+  ADMIN
+}
+
+enum Pole {
+  ARCTIC
+  ANTARCTIC
+  BIPOLAR
+}
+
+enum ContentStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  PUBLISHED
+  ARCHIVED
+  REJECTED
+}
+
+enum Discipline {
+  CLIMATE
+  GLACIOLOGY
+  MARINE_SCIENCE
+  BIODIVERSITY
+  ATMOSPHERIC_SCIENCE
+  GEOLOGY
+  OCEANOGRAPHY
+  HUMAN_INDIGENOUS
+  POLAR_TECHNOLOGY
+  PALEOCLIMATE
+  ECOLOGY
+}
+
+enum RepositoryType {
+  RESEARCH_PAPER
+  REPORT
+  TECHNICAL_DOCUMENT
+  DATASET
+  RESEARCH_SUMMARY
+  POLICY_DOCUMENT
+  CONFERENCE_PAPER
+  THESIS
+  EDUCATIONAL_DOCUMENT
+  FIELD_REPORT
+}
+
+enum MediaType {
+  PHOTO
+  VIDEO
+  AUDIO
+  DOCUMENT
+  INFOGRAPHIC
+  INTERACTIVE
+}
+
+enum EventType {
+  CONFERENCE
+  WEBINAR
+  WORKSHOP
+  SCHOOL_PROGRAM
+  EXHIBITION
+  PUBLIC_LECTURE
+  EXPEDITION
+}
+
+enum EventMode {
+  ONLINE
+  IN_PERSON
+  HYBRID
+}
+
+enum RegistrationStatus {
+  OPEN
+  WAITLIST
+  CLOSED
+  NOT_REQUIRED
+}
+
+enum NewsCategory {
+  RESEARCH
+  CLIMATE
+  EXPEDITIONS
+  POLICY
+  EDUCATION
+  TECHNOLOGY
+  BIODIVERSITY
+}
+
+enum EducationType {
+  EXPLAINER
+  LESSON_PLAN
+  INTERACTIVE_ACTIVITY
+  QUIZ
+  STUDENT_RESOURCE
+  TEACHER_RESOURCE
+}
+
+enum BookmarkType {
+  RESEARCH
+  DATASET
+  MEDIA
+  NEWS
+  EDUCATION
+  EXPEDITION
+}
+
+enum SubmissionKind {
+  RESEARCH
+  DATASET
+  MEDIA
+  EXPEDITION_UPDATE
+  NEWS
+}
+
+enum ReviewDecision {
+  PENDING
+  APPROVED
+  REJECTED
+  CHANGES_REQUESTED
+}
+
+enum NotificationType {
+  SUBMISSION_APPROVED
+  SUBMISSION_REJECTED
+  EVENT_REMINDER
+  RESEARCH_PUBLISHED
+  EXPEDITION_UPDATE
+  SYSTEM
+}
+
+enum LicenseType {
+  CC_BY
+  CC_BY_SA
+  CC_BY_NC
+  CC_BY_NC_SA
+  CC0
+  PUBLIC_DOMAIN
+  ALL_RIGHTS_RESERVED
+  OTHER
+}
+
+enum StationStatus {
+  ACTIVE
+  SEASONAL
+  INACTIVE
+  HISTORIC
+}
+
+enum LocationKind {
+  RESEARCH_STATION
+  EXPEDITION_WAYPOINT
+  OBSERVATION_SITE
+  RESEARCH_PROJECT
+  PROTECTED_AREA
+  GEOGRAPHIC_FEATURE
+}
+
+// ---------------------------------------------------------------------------
+// Auth.js (NextAuth) models
+// ---------------------------------------------------------------------------
+
+model User {
+  id                 String    @id @default(cuid())
+  name               String?
+  email              String    @unique
+  emailVerified      DateTime?
+  image              String?
+  passwordHash       String?
+  role               Role      @default(USER)
+  bio                String?
+  organization       String?
+  mustChangePassword Boolean   @default(false)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  accounts Account[]
+  sessions Session[]
+
+  researcher         Researcher?
+  bookmarks          Bookmark[]
+  downloads          Download[]
+  eventRegistrations EventRegistration[]
+  quizAttempts       QuizAttempt[]
+  notifications      Notification[]
+  submissions        Submission[]        @relation("SubmissionAuthor")
+  reviews            Review[]            @relation("Reviewer")
+  auditLogs          AuditLog[]
+
+  researchCreated   Research[]          @relation("ResearchCreatedBy")
+  researchUpdated   Research[]          @relation("ResearchUpdatedBy")
+  datasetsCreated   Dataset[]           @relation("DatasetCreatedBy")
+  mediaCreated      Media[]             @relation("MediaCreatedBy")
+  newsAuthored      NewsArticle[]       @relation("NewsAuthor")
+  eventsCreated     Event[]             @relation("EventCreatedBy")
+  expeditionUpdates ExpeditionUpdate[]  @relation("ExpeditionUpdateAuthor")
+  educationCreated  EducationResource[] @relation("EducationCreatedBy")
+  files             FileAsset[]         @relation("FileUploadedBy")
+
+  @@index([role])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  expires   DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+
+// ---------------------------------------------------------------------------
+// Directory: institutions & researchers
+// ---------------------------------------------------------------------------
+
+model Institution {
+  id            String       @id @default(cuid())
+  slug          String       @unique
+  name          String
+  acronym       String?
+  description   String?
+  country       String?
+  website       String?
+  logoUrl       String?
+  researchAreas Discipline[]
+  isDemo        Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  researchers Researcher[]
+  research    Research[]
+  datasets    Dataset[]
+  media       Media[]
+  expeditions Expedition[]
+  stations    ResearchStation[]
+
+  @@index([country])
+}
+
+model Researcher {
+  id            String       @id @default(cuid())
+  slug          String       @unique
+  fullName      String
+  title         String?
+  email         String?
+  bio           String?
+  photoUrl      String?
+  researchAreas Discipline[]
+  primaryPole   Pole?
+  orcid         String?
+  websiteUrl    String?
+  isDemo        Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  userId String? @unique
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  institutionId String?
+  institution   Institution? @relation(fields: [institutionId], references: [id], onDelete: SetNull)
+
+  authorships ResearchAuthor[]
+  expeditions ExpeditionMember[]
+
+  @@index([institutionId])
+  @@index([primaryPole])
+}
+
+// ---------------------------------------------------------------------------
+// Taxonomy: topics, tags, regions, locations
+// ---------------------------------------------------------------------------
+
+model Topic {
+  id           String      @id @default(cuid())
+  slug         String      @unique
+  name         String
+  category     String // e.g. "Climate & Atmosphere", "Ice & Glaciers"
+  overview     String?
+  keyConcepts  String[]
+  discipline   Discipline?
+  pole         Pole?
+  heroImageUrl String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  parentId String?
+  parent   Topic?  @relation("TopicTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children Topic[] @relation("TopicTree")
+
+  research  ResearchTopic[]
+  media     MediaTopic[]
+  glossary  GlossaryTerm[]
+  education EducationResource[]
+
+  @@index([category])
+  @@index([parentId])
+}
+
+model Tag {
+  id    String @id @default(cuid())
+  slug  String @unique
+  label String
+
+  research ResearchTag[]
+  media    MediaTag[]
+  news     NewsTag[]
+}
+
+model Region {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  pole      Pole
+  summary   String?
+  bbox      Json? // [minLng, minLat, maxLng, maxLat]
+  createdAt DateTime @default(now())
+
+  locations   Location[]
+  research    Research[]
+  media       Media[]
+  expeditions Expedition[]
+  stations    ResearchStation[]
+
+  @@index([pole])
+}
+
+model Location {
+  id          String       @id @default(cuid())
+  name        String
+  kind        LocationKind
+  latitude    Float
+  longitude   Float
+  description String?
+  properties  Json?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  regionId String?
+  region   Region? @relation(fields: [regionId], references: [id], onDelete: SetNull)
+
+  stationId String?          @unique
+  station   ResearchStation? @relation(fields: [stationId], references: [id], onDelete: Cascade)
+
+  @@index([kind])
+  @@index([regionId])
+  @@index([latitude, longitude])
+}
+
+model ResearchStation {
+  id              String        @id @default(cuid())
+  slug            String        @unique
+  name            String
+  country         String?
+  pole            Pole
+  status          StationStatus @default(ACTIVE)
+  establishedYear Int?
+  elevationM      Int?
+  summerCapacity  Int?
+  winterCapacity  Int?
+  description     String?
+  latitude        Float
+  longitude       Float
+  isDemo          Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  regionId String?
+  region   Region? @relation(fields: [regionId], references: [id], onDelete: SetNull)
+
+  operatorId String?
+  operator   Institution? @relation(fields: [operatorId], references: [id], onDelete: SetNull)
+
+  location Location?
+
+  @@index([pole])
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// Knowledge repository: research
+// ---------------------------------------------------------------------------
+
+model Research {
+  id          String         @id @default(cuid())
+  slug        String         @unique
+  title       String
+  abstract    String
+  description String?        @db.Text
+  type        RepositoryType @default(RESEARCH_PAPER)
+  discipline  Discipline
+  pole        Pole
+  language    String         @default("en")
+  license     LicenseType    @default(CC_BY)
+  status      ContentStatus  @default(DRAFT)
+
+  publicationDate DateTime?
+  approvedAt      DateTime?
+  publishedAt     DateTime?
+
+  doi          String? @unique
+  isbn         String?
+  externalUrl  String?
+  citationText String? @db.Text
+
+  latitude  Float?
+  longitude Float?
+
+  keywords      String[]
+  viewCount     Int      @default(0)
+  downloadCount Int      @default(0)
+  isDemo        Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  institutionId String?
+  institution   Institution? @relation(fields: [institutionId], references: [id], onDelete: SetNull)
+
+  regionId String?
+  region   Region? @relation(fields: [regionId], references: [id], onDelete: SetNull)
+
+  createdById String?
+  createdBy   User?   @relation("ResearchCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById String?
+  updatedBy   User?   @relation("ResearchUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  authors         ResearchAuthor[]
+  topics          ResearchTopic[]
+  tags            ResearchTag[]
+  files           FileAsset[]       @relation("ResearchFiles")
+  relatedDatasets DatasetResearch[]
+  relatedMedia    MediaResearch[]
+
+  @@index([status])
+  @@index([discipline])
+  @@index([pole])
+  @@index([publicationDate])
+  @@index([institutionId])
+  @@index([viewCount])
+}
+
+model ResearchAuthor {
+  id              String  @id @default(cuid())
+  researchId      String
+  researcherId    String
+  authorOrder     Int     @default(0)
+  isCorresponding Boolean @default(false)
+
+  research   Research   @relation(fields: [researchId], references: [id], onDelete: Cascade)
+  researcher Researcher @relation(fields: [researcherId], references: [id], onDelete: Cascade)
+
+  @@unique([researchId, researcherId])
+  @@index([researcherId])
+}
+
+model ResearchTopic {
+  researchId String
+  topicId    String
+  research   Research @relation(fields: [researchId], references: [id], onDelete: Cascade)
+  topic      Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@id([researchId, topicId])
+  @@index([topicId])
+}
+
+model ResearchTag {
+  researchId String
+  tagId      String
+  research   Research @relation(fields: [researchId], references: [id], onDelete: Cascade)
+  tag        Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([researchId, tagId])
+  @@index([tagId])
+}
+
+// ---------------------------------------------------------------------------
+// Datasets
+// ---------------------------------------------------------------------------
+
+model Dataset {
+  id            String        @id @default(cuid())
+  slug          String        @unique
+  title         String
+  description   String        @db.Text
+  discipline    Discipline
+  pole          Pole
+  unit          String?
+  variable      String?
+  temporalStart DateTime?
+  temporalEnd   DateTime?
+  source        String
+  publisher     String?
+  methodology   String?       @db.Text
+  license       LicenseType   @default(CC_BY)
+  doi           String?
+  externalUrl   String?
+  status        ContentStatus @default(DRAFT)
+  isDemo        Boolean       @default(true)
+  viewCount     Int           @default(0)
+  downloadCount Int           @default(0)
+  lastUpdatedAt DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  institutionId String?
+  institution   Institution? @relation(fields: [institutionId], references: [id], onDelete: SetNull)
+
+  createdById String?
+  createdBy   User?   @relation("DatasetCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  versions        DatasetVersion[]
+  relatedResearch DatasetResearch[]
+
+  @@index([status])
+  @@index([discipline])
+  @@index([pole])
+}
+
+model DatasetVersion {
+  id         String   @id @default(cuid())
+  datasetId  String
+  version    String
+  notes      String?
+  rowCount   Int?
+  // Inline series data for demo datasets: [{ t: "2020-01", value: 13.2 }, ...]
+  series     Json?
+  fileId     String?  @unique
+  releasedAt DateTime @default(now())
+
+  dataset Dataset    @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  file    FileAsset? @relation("DatasetVersionFile", fields: [fileId], references: [id], onDelete: SetNull)
+
+  @@unique([datasetId, version])
+  @@index([datasetId])
+}
+
+model DatasetResearch {
+  datasetId  String
+  researchId String
+  dataset    Dataset  @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  research   Research @relation(fields: [researchId], references: [id], onDelete: Cascade)
+
+  @@id([datasetId, researchId])
+  @@index([researchId])
+}
+
+// ---------------------------------------------------------------------------
+// Media library
+// ---------------------------------------------------------------------------
+
+model Media {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  title       String
+  description String?       @db.Text
+  type        MediaType
+  status      ContentStatus @default(DRAFT)
+
+  creator     String?
+  copyright   String?
+  license     LicenseType @default(CC_BY)
+  attribution String?
+
+  capturedAt   DateTime?
+  locationName String?
+  latitude     Float?
+  longitude    Float?
+
+  // Primary asset + optional poster/thumbnail
+  fileId       String? @unique
+  thumbnailUrl String?
+  externalUrl  String? // e.g. YouTube/Vimeo embed for VIDEO
+  transcript   String? @db.Text
+  captionsUrl  String?
+  altText      String?
+  durationSec  Int?
+
+  viewCount     Int      @default(0)
+  downloadCount Int      @default(0)
+  isDemo        Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  regionId String?
+  region   Region? @relation(fields: [regionId], references: [id], onDelete: SetNull)
+
+  institutionId String?
+  institution   Institution? @relation(fields: [institutionId], references: [id], onDelete: SetNull)
+
+  createdById String?
+  createdBy   User?   @relation("MediaCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  file FileAsset? @relation("MediaFile", fields: [fileId], references: [id], onDelete: SetNull)
+
+  topics          MediaTopic[]
+  tags            MediaTag[]
+  collections     MediaCollectionItem[]
+  relatedResearch MediaResearch[]
+
+  @@index([type])
+  @@index([status])
+  @@index([regionId])
+}
+
+model MediaCollection {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String?
+  coverUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  items MediaCollectionItem[]
+}
+
+model MediaCollectionItem {
+  collectionId String
+  mediaId      String
+  position     Int    @default(0)
+
+  collection MediaCollection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  media      Media           @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@id([collectionId, mediaId])
+  @@index([mediaId])
+}
+
+model MediaTopic {
+  mediaId String
+  topicId String
+  media   Media  @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  topic   Topic  @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@id([mediaId, topicId])
+  @@index([topicId])
+}
+
+model MediaTag {
+  mediaId String
+  tagId   String
+  media   Media  @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  tag     Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([mediaId, tagId])
+  @@index([tagId])
+}
+
+model MediaResearch {
+  mediaId    String
+  researchId String
+  media      Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  research   Research @relation(fields: [researchId], references: [id], onDelete: Cascade)
+
+  @@id([mediaId, researchId])
+  @@index([researchId])
+}
+
+// ---------------------------------------------------------------------------
+// Expeditions
+// ---------------------------------------------------------------------------
+
+model Expedition {
+  id               String        @id @default(cuid())
+  slug             String        @unique
+  name             String
+  expeditionNumber String?
+  summary          String?
+  objectives       String?       @db.Text
+  researchTopics   String[]
+  vessel           String?
+  startDate        DateTime?
+  endDate          DateTime?
+  status           ContentStatus @default(DRAFT)
+  heroImageUrl     String?
+  routeGeoJson     Json?
+  isDemo           Boolean       @default(false)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  regionId String?
+  region   Region? @relation(fields: [regionId], references: [id], onDelete: SetNull)
+
+  institutionId String?
+  institution   Institution? @relation(fields: [institutionId], references: [id], onDelete: SetNull)
+
+  members ExpeditionMember[]
+  updates ExpeditionUpdate[]
+
+  @@index([status])
+  @@index([startDate])
+}
+
+model ExpeditionMember {
+  id           String @id @default(cuid())
+  expeditionId String
+  researcherId String
+  role         String @default("Scientist") // e.g. "Lead Scientist"
+
+  expedition Expedition @relation(fields: [expeditionId], references: [id], onDelete: Cascade)
+  researcher Researcher @relation(fields: [researcherId], references: [id], onDelete: Cascade)
+
+  @@unique([expeditionId, researcherId])
+  @@index([researcherId])
+}
+
+model ExpeditionUpdate {
+  id           String   @id @default(cuid())
+  expeditionId String
+  dayNumber    Int?
+  title        String
+  body         String   @db.Text
+  postedAt     DateTime @default(now())
+  locationName String?
+  latitude     Float?
+  longitude    Float?
+  imageUrls    String[]
+  videoUrl     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  expedition Expedition @relation(fields: [expeditionId], references: [id], onDelete: Cascade)
+
+  authorId String?
+  author   User?   @relation("ExpeditionUpdateAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([expeditionId])
+  @@index([postedAt])
+}
+
+// ---------------------------------------------------------------------------
+// Events
+// ---------------------------------------------------------------------------
+
+model Event {
+  id                 String             @id @default(cuid())
+  slug               String             @unique
+  title              String
+  description        String             @db.Text
+  type               EventType
+  mode               EventMode          @default(ONLINE)
+  status             ContentStatus      @default(DRAFT)
+  startAt            DateTime
+  endAt              DateTime?
+  timezone           String             @default("UTC")
+  locationName       String?
+  latitude           Float?
+  longitude          Float?
+  organizer          String?
+  registrationUrl    String?
+  registrationStatus RegistrationStatus @default(OPEN)
+  capacity           Int?
+  contactEmail       String?
+  imageUrl           String?
+  isDemo             Boolean            @default(false)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  createdById String?
+  createdBy   User?   @relation("EventCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  registrations EventRegistration[]
+
+  @@index([status])
+  @@index([startAt])
+  @@index([type])
+}
+
+model EventRegistration {
+  id        String   @id @default(cuid())
+  eventId   String
+  userId    String
+  name      String
+  email     String
+  note      String?
+  createdAt DateTime @default(now())
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// News
+// ---------------------------------------------------------------------------
+
+model NewsArticle {
+  id           String        @id @default(cuid())
+  slug         String        @unique
+  title        String
+  subtitle     String?
+  heroImageUrl String?
+  body         String        @db.Text
+  category     NewsCategory
+  status       ContentStatus @default(DRAFT)
+  publishedAt  DateTime?
+  references   String[]
+  viewCount    Int           @default(0)
+  isDemo       Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  authorId String?
+  author   User?   @relation("NewsAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+
+  tags NewsTag[]
+
+  @@index([status])
+  @@index([category])
+  @@index([publishedAt])
+}
+
+model NewsTag {
+  articleId String
+  tagId     String
+  article   NewsArticle @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  tag       Tag         @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([articleId, tagId])
+  @@index([tagId])
+}
+
+// ---------------------------------------------------------------------------
+// Education & outreach
+// ---------------------------------------------------------------------------
+
+model EducationResource {
+  id            String        @id @default(cuid())
+  slug          String        @unique
+  title         String
+  summary       String
+  body          String        @db.Text
+  type          EducationType
+  status        ContentStatus @default(DRAFT)
+  ageGroup      String?
+  durationMin   Int?
+  objectives    String[]
+  materials     String[]
+  assessment    String?       @db.Text
+  plainLanguage String?       @db.Text
+  heroImageUrl  String?
+  attachmentId  String?       @unique
+  viewCount     Int           @default(0)
+  downloadCount Int           @default(0)
+  isDemo        Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  topicId String?
+  topic   Topic?  @relation(fields: [topicId], references: [id], onDelete: SetNull)
+
+  createdById String?
+  createdBy   User?   @relation("EducationCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  attachment FileAsset? @relation("EducationAttachment", fields: [attachmentId], references: [id], onDelete: SetNull)
+
+  quiz Quiz?
+
+  @@index([type])
+  @@index([status])
+}
+
+model Quiz {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String?
+  category    String
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  resourceId String?            @unique
+  resource   EducationResource? @relation(fields: [resourceId], references: [id], onDelete: SetNull)
+
+  questions QuizQuestion[]
+  attempts  QuizAttempt[]
+}
+
+model QuizQuestion {
+  id          String  @id @default(cuid())
+  quizId      String
+  prompt      String
+  explanation String?
+  position    Int     @default(0)
+
+  quiz    Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  options QuizOption[]
+
+  @@index([quizId])
+}
+
+model QuizOption {
+  id         String  @id @default(cuid())
+  questionId String
+  label      String
+  isCorrect  Boolean @default(false)
+  position   Int     @default(0)
+
+  question QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([questionId])
+}
+
+model QuizAttempt {
+  id        String   @id @default(cuid())
+  quizId    String
+  userId    String?
+  score     Int
+  total     Int
+  answers   Json
+  createdAt DateTime @default(now())
+
+  quiz Quiz  @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([quizId])
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// Glossary
+// ---------------------------------------------------------------------------
+
+model GlossaryTerm {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  term          String
+  definition    String   @db.Text
+  plainLanguage String?
+  pronunciation String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  topicId String?
+  topic   Topic?  @relation(fields: [topicId], references: [id], onDelete: SetNull)
+
+  @@index([term])
+}
+
+// ---------------------------------------------------------------------------
+// User activity: bookmarks, downloads, newsletter
+// ---------------------------------------------------------------------------
+
+model Bookmark {
+  id         String       @id @default(cuid())
+  userId     String
+  entityType BookmarkType
+  entityId   String
+  createdAt  DateTime     @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, entityType, entityId])
+  @@index([userId])
+  @@index([entityType, entityId])
+}
+
+model Download {
+  id         String   @id @default(cuid())
+  userId     String?
+  entityType String
+  entityId   String
+  fileType   String?
+  fileId     String?
+  ipHash     String?
+  createdAt  DateTime @default(now())
+
+  user User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  file FileAsset? @relation("FileDownloads", fields: [fileId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+model NewsletterSubscriber {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  confirmedAt    DateTime?
+  unsubscribedAt DateTime?
+  token          String    @unique
+  source         String?
+  createdAt      DateTime  @default(now())
+
+  @@index([confirmedAt])
+}
+
+// ---------------------------------------------------------------------------
+// Content workflow: submissions & reviews
+// ---------------------------------------------------------------------------
+
+model Submission {
+  id          String         @id @default(cuid())
+  kind        SubmissionKind
+  status      ContentStatus  @default(SUBMITTED)
+  title       String
+  payload     Json // proposed entity fields
+  entityId    String? // set once an entity is created/linked
+  submittedAt DateTime       @default(now())
+  decidedAt   DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  authorId String
+  author   User   @relation("SubmissionAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+
+  reviews Review[]
+
+  @@index([status])
+  @@index([kind])
+  @@index([authorId])
+}
+
+model Review {
+  id           String         @id @default(cuid())
+  submissionId String
+  reviewerId   String?
+  decision     ReviewDecision @default(PENDING)
+  comment      String?        @db.Text
+  createdAt    DateTime       @default(now())
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  reviewer   User?      @relation("Reviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
+
+  @@index([submissionId])
+}
+
+// ---------------------------------------------------------------------------
+// Files
+// ---------------------------------------------------------------------------
+
+model FileAsset {
+  id           String   @id @default(cuid())
+  provider     String   @default("local") // "local" | "s3"
+  key          String // storage key / path
+  originalName String
+  mimeType     String
+  sizeBytes    Int
+  checksum     String?
+  isPublic     Boolean  @default(false)
+  scanStatus   String   @default("pending") // pending | clean | infected | skipped
+  createdAt    DateTime @default(now())
+
+  uploadedById String?
+  uploadedBy   User?   @relation("FileUploadedBy", fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  research          Research?          @relation("ResearchFiles", fields: [researchId], references: [id], onDelete: SetNull)
+  researchId        String?
+  media             Media?             @relation("MediaFile")
+  datasetVersion    DatasetVersion?    @relation("DatasetVersionFile")
+  educationResource EducationResource? @relation("EducationAttachment")
+  downloads         Download[]         @relation("FileDownloads")
+
+  @@index([provider, key])
+  @@index([researchId])
+}
+
+// ---------------------------------------------------------------------------
+// Notifications, audit log, analytics
+// ---------------------------------------------------------------------------
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  body      String?
+  linkUrl   String?
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  action     String // e.g. "research.publish"
+  entityType String
+  entityId   String?
+  metadata   Json?
+  ipHash     String?
+  createdAt  DateTime @default(now())
+
+  actor User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([action])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+model AnalyticsEvent {
+  id         String   @id @default(cuid())
+  type       String // page_view | search | resource_view | download | media_view | event_registration
+  path       String?
+  query      String?
+  entityType String?
+  entityId   String?
+  sessionId  String?
+  referrer   String?
+  createdAt  DateTime @default(now())
+
+  @@index([type])
+  @@index([createdAt])
+  @@index([entityType, entityId])
+}
