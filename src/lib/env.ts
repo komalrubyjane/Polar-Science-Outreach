@@ -83,7 +83,23 @@ const schema = z.object({
   PEXELS_API_KEY: z.string().optional().default(''),
 });
 
-const parsed = schema.safeParse(process.env);
+/**
+ * Treat empty-string env vars as "unset" so the schema defaults below apply.
+ * Hosting dashboards (Vercel etc.) frequently materialise declared-but-blank
+ * variables as `''`, which would otherwise fail `.url()` / `.email()` / enum
+ * checks instead of falling back to the default.
+ */
+const rawEnv: Record<string, string | undefined> = {};
+for (const [key, value] of Object.entries(process.env)) {
+  rawEnv[key] = value === '' ? undefined : value;
+}
+
+// On Vercel, fall back to the deployment URL when no explicit app URL is given.
+if (!rawEnv.NEXT_PUBLIC_APP_URL && process.env.VERCEL_URL) {
+  rawEnv.NEXT_PUBLIC_APP_URL = `https://${process.env.VERCEL_URL}`;
+}
+
+const parsed = schema.safeParse(rawEnv);
 
 if (!parsed.success) {
   const issues = parsed.error.issues
