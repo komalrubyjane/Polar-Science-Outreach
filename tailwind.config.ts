@@ -2,22 +2,20 @@ import type { Config } from 'tailwindcss';
 
 const withAlpha = (v: string) => `rgb(var(${v}) / <alpha-value>)`;
 
-/** Fixed polar-blue scale — semantic names, one source of truth. */
+/** Fixed polar scale — snow · ice · water · deep ocean · polar night. */
 const polar = {
-  ice: '#F4F8FA',
-  snow: '#EAF2F6',
-  'pale-ice': '#D9E8F0',
-  glacier: '#B9D3E2',
-  mist: '#9DB8CC',
-  slate: '#7694B0',
-  blue: '#5F7F9D',
-  ocean: '#315A78',
-  'deep-ocean': '#183B56',
-  navy: '#0B2A43',
-  night: '#061D31',
-  'text-light': '#E8F0F4',
-  'text-muted': '#B8CBD8',
-  'text-dark': '#17364E',
+  snow: '#F7FBFD',
+  ice: '#EAF4F8',
+  frost: '#D9EAF2',
+  glacier: '#BCD7E5',
+  mist: '#9EBFD2',
+  water: '#6F9DB8',
+  ocean: '#3D718F',
+  'deep-water': '#23516D',
+  navy: '#123A52',
+  night: '#071F32',
+  text: '#12344A',
+  'text-muted': '#62839A',
 };
 
 const config: Config = {
@@ -84,11 +82,8 @@ const config: Config = {
         ice: withAlpha('--ice'),
         glacier: withAlpha('--glacier'),
         aurora: withAlpha('--aurora'),
-        // Legacy alias kept so existing `bg-navy` usages map to the new navy.
-        navy: {
-          DEFAULT: polar.navy,
-          light: polar['deep-ocean'],
-        },
+        // Legacy alias so existing `bg-navy` maps to the new navy.
+        navy: { DEFAULT: polar.navy, light: polar['deep-water'] },
         polar,
         chart: {
           1: withAlpha('--chart-1'),
@@ -101,8 +96,11 @@ const config: Config = {
       },
       borderRadius: {
         lg: 'var(--radius)',
-        md: 'calc(var(--radius) + 1px)',
-        sm: 'calc(var(--radius) - 1px)',
+        md: 'calc(var(--radius) - 4px)',
+        sm: 'calc(var(--radius) - 6px)',
+        card: '1.25rem',
+        'card-lg': '1.75rem',
+        'card-xl': '2rem',
       },
       fontFamily: {
         sans: ['var(--font-sans)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
@@ -113,6 +111,11 @@ const config: Config = {
       letterSpacing: { editorial: '0.16em' },
       maxWidth: { editorial: '1600px' },
       transitionTimingFunction: { editorial: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+      boxShadow: {
+        glass: '0 20px 60px rgb(7 31 50 / 0.12)',
+        ios: '0 1px 2px rgb(7 31 50 / 0.04), 0 12px 32px -12px rgb(7 31 50 / 0.14)',
+        'ios-hover': '0 2px 4px rgb(7 31 50 / 0.05), 0 28px 60px -18px rgb(7 31 50 / 0.24)',
+      },
       keyframes: {
         'accordion-down': {
           from: { height: '0' },
@@ -130,14 +133,6 @@ const config: Config = {
           from: { opacity: '0', transform: 'translateY(28px)' },
           to: { opacity: '1', transform: 'translateY(0)' },
         },
-        'clip-reveal': {
-          from: { clipPath: 'inset(0 0 100% 0)' },
-          to: { clipPath: 'inset(0 0 0 0)' },
-        },
-        'aurora-shift': {
-          '0%, 100%': { backgroundPosition: '0% 50%' },
-          '50%': { backgroundPosition: '100% 50%' },
-        },
         'scroll-cue': {
           '0%, 100%': { transform: 'translateY(0)', opacity: '0.4' },
           '50%': { transform: 'translateY(6px)', opacity: '1' },
@@ -148,8 +143,6 @@ const config: Config = {
         'accordion-up': 'accordion-up 0.2s ease-out',
         'fade-in': 'fade-in 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
         'fade-up': 'fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both',
-        'clip-reveal': 'clip-reveal 0.9s cubic-bezier(0.22, 1, 0.36, 1) both',
-        'aurora-shift': 'aurora-shift 18s ease infinite',
         'scroll-cue': 'scroll-cue 1.8s ease-in-out infinite',
       },
     },

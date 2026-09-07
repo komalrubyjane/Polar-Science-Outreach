@@ -4,6 +4,7 @@ import { safe } from '@/lib/safe';
 import { PageHero } from '@/components/content/page-hero';
 import { EmptyState } from '@/components/ui/misc';
 import { GlossaryBrowser } from '@/components/glossary/glossary-browser';
+import { demoGlossary } from '@/lib/demo-data';
 
 export const metadata: Metadata = {
   title: 'Polar Glossary',
@@ -23,6 +24,7 @@ export default async function GlossaryPage() {
     [],
     'glossary',
   );
+  const shown = terms.length ? terms : demoGlossary;
 
   return (
     <>
@@ -34,8 +36,8 @@ export default async function GlossaryPage() {
         breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'Glossary' }]}
       />
       <div className="container-page py-10">
-        {terms.length ? (
-          <GlossaryBrowser terms={terms} />
+        {shown.length ? (
+          <GlossaryBrowser terms={shown} />
         ) : (
           <EmptyState
             title="The glossary is empty"

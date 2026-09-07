@@ -14,6 +14,7 @@ export function CinematicHero({
   fallback,
   alt,
   children,
+  panels,
   align = 'end',
   minH = '100svh',
   overlayClassName,
@@ -22,6 +23,8 @@ export function CinematicHero({
   fallback: string;
   alt: string;
   children: React.ReactNode;
+  /** Floating glass panels shown over the image (desktop only). */
+  panels?: React.ReactNode;
   align?: 'center' | 'end';
   minH?: string;
   overlayClassName?: string;
@@ -73,6 +76,12 @@ export function CinematicHero({
         />
       </div>
       <div className={cn('cinematic-overlay absolute inset-0 -z-10', overlayClassName)} aria-hidden />
+
+      {panels ? (
+        <div className="pointer-events-none absolute right-8 top-1/2 z-10 hidden -translate-y-1/2 flex-col items-end gap-3 xl:flex">
+          {panels}
+        </div>
+      ) : null}
 
       <div
         className={cn(

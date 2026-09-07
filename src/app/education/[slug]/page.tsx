@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Clock, Users, Download, Target } from 'lucide-react';
 import { prisma } from '@/lib/db';
+import { findDemo } from '@/lib/demo-data';
 import { safe } from '@/lib/safe';
 import { auth } from '@/auth';
 import { getStorage } from '@/lib/storage';
@@ -17,7 +18,7 @@ import { EDUCATION_TYPE_LABELS } from '@/lib/constants';
 export const dynamic = 'force-dynamic';
 
 async function getResource(slug: string) {
-  return safe(
+  const real = await safe(
     () =>
       prisma.educationResource.findFirst({
         where: { slug },
@@ -30,6 +31,7 @@ async function getResource(slug: string) {
     null,
     'eduDetail',
   );
+  return real ?? (findDemo('education', slug) as unknown as typeof real);
 }
 
 export async function generateMetadata({

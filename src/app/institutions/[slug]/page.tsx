@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Globe, Building2 } from 'lucide-react';
 import { prisma } from '@/lib/db';
+import { findDemo } from '@/lib/demo-data';
 import { safe } from '@/lib/safe';
 import { PageHero } from '@/components/content/page-hero';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +14,7 @@ import { DISCIPLINE_LABELS } from '@/lib/constants';
 export const dynamic = 'force-dynamic';
 
 async function getInstitution(slug: string) {
-  return safe(
+  const real = await safe(
     () =>
       prisma.institution.findUnique({
         where: { slug },
@@ -45,6 +46,7 @@ async function getInstitution(slug: string) {
     null,
     'institutionDetail',
   );
+  return real ?? (findDemo('institutions', slug) as unknown as typeof real);
 }
 
 export async function generateMetadata({

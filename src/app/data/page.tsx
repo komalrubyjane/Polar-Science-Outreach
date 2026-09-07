@@ -8,6 +8,14 @@ import { listAllSeries, anyExternalProviderConfigured } from '@/lib/data-provide
 import { prisma } from '@/lib/db';
 import { safe } from '@/lib/safe';
 import { DatasetCard } from '@/components/content/cards';
+import { demoDatasets } from '@/lib/demo-data';
+import { AnimatedNumber } from '@/components/motion';
+import { DEMO_SERIES } from '@/lib/data-providers/demo';
+
+function metric(id: keyof typeof DEMO_SERIES) {
+  const s = DEMO_SERIES[id]();
+  return { name: s.name, unit: s.unit, last: s.points[s.points.length - 1]?.value ?? 0 };
+}
 
 export const metadata: Metadata = {
   title: 'Polar Data',
@@ -31,16 +39,33 @@ export default async function DataPage() {
     [],
     'dataDatasets',
   );
+  const datasetRows = datasets.length ? datasets : demoDatasets;
 
   return (
     <>
       <PageHero
         imageSlot="data"
         eyebrow="Polar Data"
-        title="Polar environmental data"
+        title="Read the changing pulse of Earth's frozen regions."
         description="Interactive time-series for key polar indicators. The portal is a dissemination platform: every series shows its source, unit, methodology and last-updated date."
         breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'Polar Data' }]}
-      />
+      >
+        <div className="grid gap-3 sm:grid-cols-3">
+          {[
+            metric('arctic-sea-ice-extent'),
+            metric('antarctic-sea-ice-extent'),
+            metric('southern-ocean-sst'),
+          ].map((m) => (
+            <div key={m.name} className="glass rounded-2xl px-4 py-3 text-foreground">
+              <p className="metadata">{m.name.replace(' (demo)', '')}</p>
+              <p className="mt-1 font-display text-2xl font-medium">
+                <AnimatedNumber value={m.last} decimals={1} suffix={` ${m.unit}`} />
+              </p>
+              <p className="mt-0.5 text-[0.7rem] text-warning">Demonstration dataset</p>
+            </div>
+          ))}
+        </div>
+      </PageHero>
 
       <div className="container-page py-10">
         {!externalConfigured ? (
@@ -81,11 +106,11 @@ export default async function DataPage() {
           ))}
         </div>
 
-        {datasets.length ? (
+        {datasetRows.length ? (
           <section className="mt-14">
             <h2 className="mb-4 font-display text-xl font-semibold">Catalogued datasets</h2>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {datasets.map((d) => (
+              {datasetRows.map((d) => (
                 <DatasetCard key={d.id} data={d} />
               ))}
             </div>

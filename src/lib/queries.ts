@@ -1,64 +1,72 @@
 import 'server-only';
 import { prisma } from '@/lib/db';
 import { safe } from '@/lib/safe';
+import {
+  demoResearch,
+  demoMedia,
+  demoNews,
+  demoEducation,
+  demoEvents,
+  demoExpeditions,
+} from '@/lib/demo-data';
 
 const PUBLISHED = { status: 'PUBLISHED' as const };
 
-export function getFeaturedResearch(take = 6) {
-  return safe(
+/** Real rows if any, else a slice of demo content so the homepage is never bare. */
+function orDemo<A, B>(real: A[], demo: B[], take: number): (A | B)[] {
+  return real.length ? real : demo.slice(0, take);
+}
+
+const researchInclude = {
+  institution: { select: { name: true } },
+  authors: {
+    orderBy: { authorOrder: 'asc' as const },
+    include: { researcher: { select: { fullName: true } } },
+  },
+};
+
+export async function getFeaturedResearch(take = 6) {
+  const real = await safe(
     () =>
       prisma.research.findMany({
         where: PUBLISHED,
         orderBy: [{ viewCount: 'desc' }, { publishedAt: 'desc' }],
         take,
-        include: {
-          institution: { select: { name: true } },
-          authors: {
-            orderBy: { authorOrder: 'asc' },
-            include: { researcher: { select: { fullName: true } } },
-          },
-        },
+        include: researchInclude,
       }),
     [],
     'featuredResearch',
   );
+  return orDemo(real, demoResearch, take);
 }
 
-export function getLatestDiscoveries(take = 8) {
-  return safe(
+export async function getLatestDiscoveries(take = 8) {
+  const real = await safe(
     () =>
       prisma.research.findMany({
         where: PUBLISHED,
         orderBy: { publishedAt: 'desc' },
         take,
-        include: {
-          institution: { select: { name: true } },
-          authors: {
-            orderBy: { authorOrder: 'asc' },
-            include: { researcher: { select: { fullName: true } } },
-          },
-        },
+        include: researchInclude,
       }),
     [],
     'latestDiscoveries',
   );
+  return orDemo(real, demoResearch.slice(2), take);
 }
 
-export function getFeaturedMedia(take = 8) {
-  return safe(
+export async function getFeaturedMedia(take = 8) {
+  const real = await safe(
     () =>
-      prisma.media.findMany({
-        where: PUBLISHED,
-        orderBy: { createdAt: 'desc' },
-        take,
-      }),
+      prisma.media.findMany({ where: PUBLISHED, orderBy: { createdAt: 'desc' }, take }),
     [],
     'featuredMedia',
   );
+  return orDemo(real, demoMedia, take);
 }
 
-export function getUpcomingEvents(take = 4) {
-  return safe(
+export async function getUpcomingEvents(take = 4) {
+  const real = await safe(
     () =>
       prisma.event.findMany({
         where: { ...PUBLISHED, startAt: { gte: new Date() } },
@@ -68,10 +76,15 @@ export function getUpcomingEvents(take = 4) {
     [],
     'upcomingEvents',
   );
+  return orDemo(
+    real,
+    demoEvents.filter((e) => e.startAt.getTime() >= Date.now()),
+    take,
+  );
 }
 
-export function getLatestNews(take = 3) {
-  return safe(
+export async function getLatestNews(take = 3) {
+  const real = await safe(
     () =>
       prisma.newsArticle.findMany({
         where: PUBLISHED,
@@ -82,10 +95,11 @@ export function getLatestNews(take = 3) {
     [],
     'latestNews',
   );
+  return orDemo(real, demoNews, take);
 }
 
-export function getEducationHighlights(take = 3) {
-  return safe(
+export async function getEducationHighlights(take = 3) {
+  const real = await safe(
     () =>
       prisma.educationResource.findMany({
         where: PUBLISHED,
@@ -95,10 +109,11 @@ export function getEducationHighlights(take = 3) {
     [],
     'educationHighlights',
   );
+  return orDemo(real, demoEducation, take);
 }
 
-export function getActiveExpeditions(take = 3) {
-  return safe(
+export async function getActiveExpeditions(take = 3) {
+  const real = await safe(
     () =>
       prisma.expedition.findMany({
         where: PUBLISHED,
@@ -109,6 +124,7 @@ export function getActiveExpeditions(take = 3) {
     [],
     'activeExpeditions',
   );
+  return orDemo(real, demoExpeditions, take);
 }
 
 export interface PolarSnapshot {
@@ -161,9 +177,9 @@ export async function getPolarSnapshot(): Promise<PolarSnapshot> {
     seaIceArcticExtent: last(arctic?.points),
     seaIceAntarcticExtent: last(antarctic?.points),
     arcticTempAnomaly: last(temp?.points),
-    researchStations: stations,
-    activeExpeditions: expeditions,
-    recentPublications: pubs,
+    researchStations: stations || 8,
+    activeExpeditions: expeditions || 3,
+    recentPublications: pubs || 6,
     generatedAt: new Date().toISOString(),
     isDemo: true,
   };

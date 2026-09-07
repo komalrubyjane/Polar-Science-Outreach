@@ -123,7 +123,7 @@ export function FilterBar({
       </div>
 
       {open && fields.length ? (
-        <div className="grid gap-3 rounded-lg border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="glass grid gap-3 rounded-card p-4 sm:grid-cols-2 lg:grid-cols-4">
           {fields.map((f) => (
             <div key={f.key}>
               <label className="mb-1 block text-xs font-medium text-muted-foreground">

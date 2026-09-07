@@ -8,6 +8,7 @@ import { FilterBar } from '@/components/content/filter-bar';
 import { EducationCard } from '@/components/content/cards';
 import { Pagination } from '@/components/ui/pagination';
 import { EmptyState } from '@/components/ui/misc';
+import { demoFallback, demoEducation } from '@/lib/demo-data';
 import { pageArgs, textWhere } from '@/lib/services/list-helpers';
 import { EDUCATION_TYPE_LABELS } from '@/lib/constants';
 
@@ -43,6 +44,8 @@ export default async function EducationPage({
     ),
     safe(() => prisma.educationResource.count({ where }), 0, 'eduCount'),
   ]);
+  const active = Boolean(get('q') || get('type') || page > 1);
+  const { items: shown, isDemo } = demoFallback(items, demoEducation, { active });
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
 
   return (
@@ -76,14 +79,14 @@ export default async function EducationPage({
           ]}
         />
 
-        {items.length ? (
+        {shown.length ? (
           <>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {items.map((e) => (
+              {shown.map((e) => (
                 <EducationCard key={e.id} data={e} />
               ))}
             </div>
-            <Pagination page={page} pageCount={pageCount} />
+            {!isDemo ? <Pagination page={page} pageCount={pageCount} /> : null}
           </>
         ) : (
           <EmptyState title="No resources published yet" description="Seed the database to load demo education content." />

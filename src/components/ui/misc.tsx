@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 export function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn('animate-pulse rounded-sm bg-surface-muted', className)}
+      className={cn('skeleton rounded-md', className)}
       {...props}
     />
   );
@@ -14,7 +14,7 @@ export function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivEl
 
 export function CardSkeleton() {
   return (
-    <div className="border border-border bg-surface p-1">
+    <div className="rounded-card border border-border bg-surface p-1">
       <Skeleton className="aspect-[4/3] w-full" />
       <div className="p-4">
         <Skeleton className="mb-3 h-3 w-24" />
@@ -37,7 +37,7 @@ export function EmptyState({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-start gap-4 border border-dashed border-border px-8 py-16 sm:py-24">
+    <div className="flex flex-col items-start gap-4 rounded-card border border-dashed border-border px-8 py-16 sm:py-24">
       {Icon ? <Icon className="h-6 w-6 text-muted-foreground" /> : null}
       <h3 className="display-3 uppercase tracking-tight">{title}</h3>
       {description ? (
@@ -58,7 +58,7 @@ export function ErrorState({
   retry?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-start gap-4 border border-destructive/40 bg-destructive/[0.04] px-8 py-16">
+    <div className="flex flex-col items-start gap-4 rounded-card border border-destructive/40 bg-destructive/[0.04] px-8 py-16">
       <AlertTriangle className="h-6 w-6 text-destructive" />
       <h3 className="display-3 uppercase tracking-tight">{title}</h3>
       <p className="max-w-md text-sm text-muted-foreground">{description}</p>

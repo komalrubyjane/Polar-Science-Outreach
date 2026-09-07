@@ -7,6 +7,7 @@ import { FilterBar } from '@/components/content/filter-bar';
 import { ArticleCard } from '@/components/content/cards';
 import { Pagination } from '@/components/ui/pagination';
 import { EmptyState } from '@/components/ui/misc';
+import { demoFallback, demoNews } from '@/lib/demo-data';
 import { pageArgs, textWhere } from '@/lib/services/list-helpers';
 import { NEWS_CATEGORY_LABELS } from '@/lib/constants';
 
@@ -48,6 +49,8 @@ export default async function NewsPage({
     ),
     safe(() => prisma.newsArticle.count({ where }), 0, 'newsCount'),
   ]);
+  const active = Boolean(get('q') || get('category') || page > 1);
+  const { items: shown, isDemo } = demoFallback(items, demoNews, { active });
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
   const [featured, ...rest] = items;
 
@@ -79,7 +82,7 @@ export default async function NewsPage({
 
         <FilterBar searchPlaceholder="Search news…" fields={[]} />
 
-        {items.length ? (
+        {shown.length ? (
           <>
             {featured && page === 1 && !get('q') && !get('category') ? (
               <Link
@@ -111,11 +114,11 @@ export default async function NewsPage({
             ) : null}
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {(page === 1 && !get('q') && !get('category') ? rest : items).map((n) => (
+              {(page === 1 && !get('q') && !get('category') ? rest : shown).map((n) => (
                 <ArticleCard key={n.id} data={n} />
               ))}
             </div>
-            <Pagination page={page} pageCount={pageCount} />
+            {!isDemo ? <Pagination page={page} pageCount={pageCount} /> : null}
           </>
         ) : (
           <EmptyState title="No news articles yet" description="Seed the database to load demo articles." />

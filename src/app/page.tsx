@@ -12,7 +12,8 @@ import {
 } from '@/components/editorial/primitives';
 import { CinematicHero } from '@/components/editorial/cinematic-hero';
 import { ScrollCue } from '@/components/editorial/scroll-cue';
-import { Reveal } from '@/components/editorial/reveal';
+import { Reveal, Stagger, AnimatedNumber } from '@/components/motion';
+import { FloatingStat } from '@/components/glass';
 import { SmartImage } from '@/components/editorial/smart-image';
 import { Sparkline } from '@/components/editorial/sparkline';
 import {
@@ -30,6 +31,7 @@ import {
   getActiveExpeditions,
 } from '@/lib/queries';
 import { DEMO_SERIES } from '@/lib/data-providers/demo';
+import { DEMO_COUNTS } from '@/lib/demo-data';
 import { getEditorialImage } from '@/lib/images/provider';
 import { formatDate } from '@/lib/utils';
 import { DISCIPLINE_LABELS, POLE_LABELS, REPOSITORY_TYPE_LABELS } from '@/lib/constants';
@@ -71,35 +73,62 @@ export default async function HomePage() {
   return (
     <>
       {/* ─────────────────────────── HERO ─────────────────────────── */}
-      <CinematicHero candidates={hero.candidates} fallback={hero.fallback} alt={hero.alt}>
+      <CinematicHero
+        candidates={hero.candidates}
+        fallback={hero.fallback}
+        alt={hero.alt}
+        panels={
+          <>
+            <FloatingStat label="Region" value="78° N" sub="Arctic Ocean" />
+            <FloatingStat
+              label="Sea ice extent"
+              value={<AnimatedNumber value={seaIce.last} decimals={1} suffix=" M km²" />}
+              sub="Demonstration dataset"
+              className="[animation-delay:1.2s]"
+            />
+            <FloatingStat
+              label="Research stations"
+              value={<AnimatedNumber value={8} />}
+              sub="Catalogued"
+              className="[animation-delay:2.4s]"
+            />
+          </>
+        }
+      >
         <div className="max-w-5xl">
-          <Eyebrow className="text-white/70">Polar Science Portal</Eyebrow>
-          <h1 className="display-hero mt-6 text-white">
-            Earth&apos;s
-            <br />
-            frozen
-            <br />
-            <span className="text-white/70">frontier</span>
-          </h1>
-          <p className="mt-8 max-w-xl text-lg leading-relaxed text-white/80 sm:text-xl">
-            Explore the science, people, places and changing environments of the Arctic and
-            Antarctic.
-          </p>
-          <div className="mt-10 flex flex-wrap items-center gap-4">
-            <Button asChild size="lg" className="hover-arrow bg-polar-snow text-polar-deep-ocean hover:bg-white">
-              <Link href="/explore">
-                Explore Polar Science <ArrowRight />
-              </Link>
-            </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="border-white/45 text-white hover:bg-white/10 hover:text-white"
-            >
-              <Link href="/data">View Data</Link>
-            </Button>
-          </div>
+          <Stagger>
+            <Eyebrow className="text-white/70">Polar Science Portal</Eyebrow>
+            <h1 className="display-hero mt-6 text-white">
+              Earth&apos;s
+              <br />
+              frozen
+              <br />
+              <span className="text-white/70">frontier</span>
+            </h1>
+            <p className="mt-8 max-w-xl text-lg leading-relaxed text-white/80 sm:text-xl">
+              Explore the science, people, places and changing environments of the Arctic and
+              Antarctic.
+            </p>
+            <div className="mt-10 flex flex-wrap items-center gap-4">
+              <Button
+                asChild
+                size="lg"
+                className="hover-arrow bg-polar-snow text-polar-deep-ocean hover:bg-white"
+              >
+                <Link href="/explore">
+                  Explore the Polar World <ArrowRight />
+                </Link>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="border-white/45 text-white hover:bg-white/10 hover:text-white"
+              >
+                <Link href="/data">View Data</Link>
+              </Button>
+            </div>
+          </Stagger>
         </div>
 
         <div className="mt-16 flex items-end justify-between gap-6">
@@ -142,6 +171,22 @@ export default async function HomePage() {
               </div>
             </div>
           </div>
+        </Reveal>
+
+        <Reveal className="mt-16 grid grid-cols-2 gap-px overflow-hidden rounded-card border border-border bg-border sm:grid-cols-4">
+          {[
+            ['Research records', DEMO_COUNTS.research, '+'],
+            ['Researchers', DEMO_COUNTS.researchers, '+'],
+            ['Datasets', DEMO_COUNTS.datasets, '+'],
+            ['Institutions', DEMO_COUNTS.institutions, ''],
+          ].map(([label, n, suffix]) => (
+            <div key={label as string} className="bg-surface p-6">
+              <p className="font-display text-3xl font-medium sm:text-4xl">
+                <AnimatedNumber value={n as number} suffix={suffix as string} />
+              </p>
+              <p className="metadata mt-2">{label as string}</p>
+            </div>
+          ))}
         </Reveal>
       </section>
 

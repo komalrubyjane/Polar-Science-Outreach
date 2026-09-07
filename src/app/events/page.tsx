@@ -6,6 +6,7 @@ import { FilterBar } from '@/components/content/filter-bar';
 import { EventCard } from '@/components/content/cards';
 import { Pagination } from '@/components/ui/pagination';
 import { EmptyState } from '@/components/ui/misc';
+import { demoFallback, demoEvents } from '@/lib/demo-data';
 import { pageArgs, textWhere } from '@/lib/services/list-helpers';
 import { EVENT_TYPE_LABELS } from '@/lib/constants';
 import { formatDate } from '@/lib/utils';
@@ -54,6 +55,8 @@ export default async function EventsPage({
     ),
     safe(() => prisma.event.count({ where }), 0, 'eventsCount'),
   ]);
+  const active = Boolean(get('q') || get('type') || get('when') || page > 1);
+  const { items: shown, isDemo } = demoFallback(items, demoEvents, { active });
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
 
   const grouped = new Map<string, typeof items>();
@@ -91,7 +94,7 @@ export default async function EventsPage({
           ]}
         />
 
-        {items.length ? (
+        {shown.length ? (
           <>
             {[...grouped.entries()].map(([month, list]) => (
               <section key={month} className="mb-10">
@@ -105,7 +108,7 @@ export default async function EventsPage({
                 </div>
               </section>
             ))}
-            <Pagination page={page} pageCount={pageCount} />
+            {!isDemo ? <Pagination page={page} pageCount={pageCount} /> : null}
           </>
         ) : (
           <EmptyState

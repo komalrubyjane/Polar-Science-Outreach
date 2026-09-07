@@ -38,15 +38,19 @@ export function SiteHeader() {
   }, [pathname]);
 
   const transparent = overHero && !scrolled;
+  const glassDark = overHero && scrolled; // scrolled past a cinematic hero
 
   return (
     <header
       data-transparent={transparent}
       className={cn(
-        'fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,height,color] duration-500 ease-editorial',
-        transparent
-          ? 'border-b border-transparent bg-transparent text-white'
-          : 'border-b border-border bg-background/80 text-foreground backdrop-blur-xl supports-[backdrop-filter]:bg-background/70',
+        'fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,height,color,box-shadow] duration-500 ease-editorial',
+        transparent && 'border-b border-transparent bg-transparent text-white',
+        glassDark &&
+          'border-b border-white/12 bg-[rgb(7_31_50_/_0.55)] text-white shadow-[0_10px_40px_rgb(7_31_50_/_0.18)] [backdrop-filter:blur(20px)_saturate(140%)]',
+        !transparent &&
+          !glassDark &&
+          'border-b border-border bg-[rgb(var(--surface)_/_0.7)] text-foreground shadow-[0_10px_40px_rgb(7_31_50_/_0.08)] [backdrop-filter:blur(20px)_saturate(140%)]',
       )}
       style={{ ['--_h' as string]: scrolled ? '4.25rem' : '5.25rem' }}
     >

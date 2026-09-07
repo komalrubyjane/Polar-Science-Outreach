@@ -8,6 +8,7 @@ import { ResearchCard } from '@/components/content/cards';
 import { Pagination } from '@/components/ui/pagination';
 import { EmptyState } from '@/components/ui/misc';
 import { track } from '@/lib/analytics';
+import { demoFallback, demoResearch } from '@/lib/demo-data';
 import {
   DISCIPLINE_LABELS,
   POLE_LABELS,
@@ -72,8 +73,21 @@ export default async function RepositoryPage({
     [],
     'repositoryHydrate',
   );
-  const ordered = ids.map((id) => rows.find((r) => r.id === id)).filter(Boolean);
-  const pageCount = Math.max(1, Math.ceil(total / pageSize));
+  const orderedReal = ids.map((id) => rows.find((r) => r.id === id)).filter(Boolean);
+
+  const active = Boolean(
+    q ||
+      get('pole') ||
+      get('discipline') ||
+      get('type') ||
+      get('license') ||
+      get('yearFrom') ||
+      get('yearTo') ||
+      page > 1,
+  );
+  const { items: ordered, isDemo } = demoFallback(orderedReal, demoResearch, { active });
+  const shownTotal = isDemo ? demoResearch.length : total;
+  const pageCount = isDemo ? 1 : Math.max(1, Math.ceil(total / pageSize));
 
   if (q) void track({ type: 'search', query: q, path: '/repository' });
 
@@ -136,10 +150,13 @@ export default async function RepositoryPage({
           ]}
         />
 
-        <p className="mb-4 text-sm text-muted-foreground" aria-live="polite">
-          {formatNumber(total)} {total === 1 ? 'result' : 'results'}
-          {q ? ` for “${q}”` : ''}
-        </p>
+        <div className="mb-4 flex items-center gap-3" aria-live="polite">
+          <p className="text-sm text-muted-foreground">
+            {formatNumber(shownTotal)} {shownTotal === 1 ? 'result' : 'results'}
+            {q ? ` for “${q}”` : ''}
+          </p>
+          {isDemo ? <span className="metadata rounded-full bg-warning/14 px-2.5 py-0.5 text-warning">Demo data</span> : null}
+        </div>
 
         {ordered.length ? (
           <>
@@ -148,16 +165,12 @@ export default async function RepositoryPage({
                 <ResearchCard key={r!.id} data={r!} />
               ))}
             </div>
-            <Pagination page={page} pageCount={pageCount} />
+            {!isDemo ? <Pagination page={page} pageCount={pageCount} /> : null}
           </>
         ) : (
           <EmptyState
             title="No matching records"
-            description={
-              q
-                ? 'Try broader keywords, or clear some filters.'
-                : 'The repository has no published records yet. Run `npm run db:seed` to load demo content.'
-            }
+            description="Try broader keywords, or clear some filters."
           />
         )}
       </div>

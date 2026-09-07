@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import dynamic from 'next/dynamic';
-import { Loader2, List, Map as MapIcon } from 'lucide-react';
+import { List, Map as MapIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LAYER_META, type MapFeature } from './polar-map';
@@ -11,8 +11,7 @@ import { cn } from '@/lib/utils';
 const PolarMap = dynamic(() => import('./polar-map').then((m) => m.PolarMap), {
   ssr: false,
   loading: () => (
-    <div className="flex h-full items-center justify-center bg-muted">
-      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+    <div className="relative h-full w-full overflow-hidden bg-surface-muted"><div className="skeleton absolute inset-0" /><div className="absolute inset-0 flex items-center justify-center">      <span className="glass rounded-full px-4 py-2 text-xs font-medium uppercase tracking-[0.14em] text-foreground">Loading map…</span></div>
     </div>
   ),
 });
@@ -48,7 +47,7 @@ export function MapExplorer({ features }: { features: MapFeature[] }) {
   return (
     <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
       <div className="space-y-4">
-        <div className="rounded-lg border border-border bg-card p-4">
+        <div className="glass rounded-card p-4">
           <p className="mb-2 text-sm font-semibold">View</p>
           <div className="flex gap-2">
             {(['arctic', 'antarctic'] as const).map((v) => (
@@ -65,7 +64,7 @@ export function MapExplorer({ features }: { features: MapFeature[] }) {
           </div>
         </div>
 
-        <div className="rounded-lg border border-border bg-card p-4">
+        <div className="glass rounded-card p-4">
           <p className="mb-2 text-sm font-semibold">Layers</p>
           <ul className="space-y-2">
             {allLayers.map((layer) => {
@@ -99,7 +98,7 @@ export function MapExplorer({ features }: { features: MapFeature[] }) {
           </ul>
         </div>
 
-        <div className="rounded-lg border border-border bg-card p-4">
+        <div className="glass rounded-card p-4">
           <label htmlFor="loc-search" className="mb-2 block text-sm font-semibold">
             Search locations
           </label>
@@ -130,12 +129,12 @@ export function MapExplorer({ features }: { features: MapFeature[] }) {
           </Button>
         </div>
 
-        <div className={cn('h-[560px] overflow-hidden rounded-xl border border-border', tab === 'list' && 'hidden')}>
+        <div className={cn('h-[560px] overflow-hidden rounded-card border border-border', tab === 'list' && 'hidden')}>
           <PolarMap features={features} view={view} activeLayers={active} />
         </div>
 
         {tab === 'list' ? (
-          <div className="max-h-[560px] overflow-y-auto rounded-xl border border-border">
+          <div className="max-h-[560px] overflow-y-auto rounded-card border border-border">
             <table className="w-full text-sm">
               <thead className="sticky top-0 bg-muted/80 backdrop-blur">
                 <tr>

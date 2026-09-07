@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/db';
+import { findDemo } from '@/lib/demo-data';
 import { safe } from '@/lib/safe';
 import { auth } from '@/auth';
 import { getStorage } from '@/lib/storage';
@@ -18,7 +19,7 @@ import { MEDIA_TYPE_LABELS, LICENSE_LABELS, POLE_LABELS } from '@/lib/constants'
 export const dynamic = 'force-dynamic';
 
 async function getMedia(slug: string) {
-  return safe(
+  const real = await safe(
     () =>
       prisma.media.findFirst({
         where: { slug },
@@ -33,6 +34,7 @@ async function getMedia(slug: string) {
     null,
     'mediaDetail',
   );
+  return real ?? (findDemo('media', slug) as unknown as typeof real);
 }
 
 export async function generateMetadata({

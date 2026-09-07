@@ -9,6 +9,7 @@ import { EmptyState } from '@/components/ui/misc';
 import { pageArgs, textWhere } from '@/lib/services/list-helpers';
 import { MEDIA_TYPE_LABELS } from '@/lib/constants';
 import { formatNumber } from '@/lib/utils';
+import { demoFallback, demoMedia } from '@/lib/demo-data';
 
 export const metadata: Metadata = {
   title: 'Media Library',
@@ -44,6 +45,8 @@ export default async function MediaPage({
     safe(() => prisma.media.count({ where }), 0, 'mediaCount'),
     safe(() => prisma.region.findMany({ select: { id: true, name: true } }), [], 'mediaRegions'),
   ]);
+  const active = Boolean(get('q') || get('type') || get('regionId') || page > 1);
+  const { items: shown, isDemo } = demoFallback(items, demoMedia, { active });
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
 
   return (
@@ -71,17 +74,20 @@ export default async function MediaPage({
             },
           ]}
         />
-        <p className="mb-4 text-sm text-muted-foreground" aria-live="polite">
-          {formatNumber(total)} {total === 1 ? 'item' : 'items'}
-        </p>
-        {items.length ? (
+        <div className="mb-4 flex items-center gap-3" aria-live="polite">
+          <p className="text-sm text-muted-foreground">
+            {formatNumber(isDemo ? demoMedia.length : total)} {(isDemo ? demoMedia.length : total) === 1 ? 'item' : 'items'}
+          </p>
+          {isDemo ? <span className="metadata rounded-full bg-warning/14 px-2.5 py-0.5 text-warning">Demo data</span> : null}
+        </div>
+        {shown.length ? (
           <>
             <div className="columns-2 gap-4 sm:columns-3 lg:columns-4 [&>*]:mb-4 [&>*]:break-inside-avoid">
-              {items.map((m) => (
+              {shown.map((m) => (
                 <MediaCard key={m.id} data={m} />
               ))}
             </div>
-            <Pagination page={page} pageCount={pageCount} />
+            {!isDemo ? <Pagination page={page} pageCount={pageCount} /> : null}
           </>
         ) : (
           <EmptyState

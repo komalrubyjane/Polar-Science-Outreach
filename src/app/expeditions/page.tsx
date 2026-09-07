@@ -6,6 +6,7 @@ import { FilterBar } from '@/components/content/filter-bar';
 import { ExpeditionCard } from '@/components/content/cards';
 import { Pagination } from '@/components/ui/pagination';
 import { EmptyState } from '@/components/ui/misc';
+import { demoFallback, demoExpeditions } from '@/lib/demo-data';
 import { pageArgs, textWhere } from '@/lib/services/list-helpers';
 
 export const metadata: Metadata = {
@@ -48,6 +49,8 @@ export default async function ExpeditionsPage({
     safe(() => prisma.expedition.count({ where }), 0, 'expCount'),
     safe(() => prisma.region.findMany({ select: { id: true, name: true } }), [], 'expRegions'),
   ]);
+  const active = Boolean(get('q') || get('regionId') || page > 1);
+  const { items: shown, isDemo } = demoFallback(items, demoExpeditions, { active });
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
 
   return (
@@ -70,14 +73,14 @@ export default async function ExpeditionsPage({
             },
           ]}
         />
-        {items.length ? (
+        {shown.length ? (
           <>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {items.map((e) => (
+              {shown.map((e) => (
                 <ExpeditionCard key={e.id} data={e} />
               ))}
             </div>
-            <Pagination page={page} pageCount={pageCount} />
+            {!isDemo ? <Pagination page={page} pageCount={pageCount} /> : null}
           </>
         ) : (
           <EmptyState title="No expeditions published yet" description="Seed the database to load demo expeditions." />

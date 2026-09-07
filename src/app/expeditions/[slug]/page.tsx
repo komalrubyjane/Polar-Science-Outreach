@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Ship, Users, Target, MapPin, CalendarRange } from 'lucide-react';
 import { prisma } from '@/lib/db';
+import { findDemo } from '@/lib/demo-data';
 import { safe } from '@/lib/safe';
 import { auth } from '@/auth';
 import { renderMarkdown } from '@/lib/markdown';
@@ -14,7 +15,7 @@ import { formatDate, formatDateTime } from '@/lib/utils';
 export const dynamic = 'force-dynamic';
 
 async function getExpedition(slug: string) {
-  return safe(
+  const real = await safe(
     () =>
       prisma.expedition.findFirst({
         where: { slug },
@@ -33,6 +34,7 @@ async function getExpedition(slug: string) {
     null,
     'expDetail',
   );
+  return real ?? (findDemo('expeditions', slug) as unknown as typeof real);
 }
 
 export async function generateMetadata({

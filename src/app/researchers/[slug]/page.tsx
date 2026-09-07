@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ExternalLink, Mail } from 'lucide-react';
 import { prisma } from '@/lib/db';
+import { findDemo } from '@/lib/demo-data';
 import { safe } from '@/lib/safe';
 import { PageHero } from '@/components/content/page-hero';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +14,7 @@ import { formatDate } from '@/lib/utils';
 export const dynamic = 'force-dynamic';
 
 async function getResearcher(slug: string) {
-  return safe(
+  const real = await safe(
     () =>
       prisma.researcher.findUnique({
         where: { slug },
@@ -37,6 +38,7 @@ async function getResearcher(slug: string) {
     null,
     'researcherDetail',
   );
+  return real ?? (findDemo('researchers', slug) as unknown as typeof real);
 }
 
 export async function generateMetadata({

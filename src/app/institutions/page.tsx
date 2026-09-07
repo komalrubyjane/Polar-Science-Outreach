@@ -9,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Pagination } from '@/components/ui/pagination';
 import { EmptyState } from '@/components/ui/misc';
+import { demoFallback, demoInstitutions } from '@/lib/demo-data';
 import { pageArgs, textWhere } from '@/lib/services/list-helpers';
 import { DISCIPLINE_LABELS } from '@/lib/constants';
 import { truncate } from '@/lib/utils';
@@ -60,6 +61,8 @@ export default async function InstitutionsPage({
       'instCountries',
     ),
   ]);
+  const active = Boolean(get('q') || get('country') || page > 1);
+  const { items: shown, isDemo } = demoFallback(items, demoInstitutions, { active });
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
 
   return (
@@ -84,10 +87,10 @@ export default async function InstitutionsPage({
             },
           ]}
         />
-        {items.length ? (
+        {shown.length ? (
           <>
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {items.map((i) => (
+              {shown.map((i) => (
                 <Link key={i.id} href={`/institutions/${i.slug}`}>
                   <Card className="h-full transition-shadow hover:shadow-md">
                     <CardContent className="p-5">
@@ -125,7 +128,7 @@ export default async function InstitutionsPage({
                 </Link>
               ))}
             </div>
-            <Pagination page={page} pageCount={pageCount} />
+            {!isDemo ? <Pagination page={page} pageCount={pageCount} /> : null}
           </>
         ) : (
           <EmptyState title="No institutions found" description="Seed the database to load demo institutions." />

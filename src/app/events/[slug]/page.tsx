@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { CalendarDays, Clock, MapPin, Users, Mail } from 'lucide-react';
 import { prisma } from '@/lib/db';
+import { findDemo } from '@/lib/demo-data';
 import { safe } from '@/lib/safe';
 import { auth } from '@/auth';
 import { renderMarkdown } from '@/lib/markdown';
@@ -14,7 +15,7 @@ import { EVENT_TYPE_LABELS } from '@/lib/constants';
 export const dynamic = 'force-dynamic';
 
 async function getEvent(slug: string) {
-  return safe(
+  const real = await safe(
     () =>
       prisma.event.findFirst({
         where: { slug },
@@ -23,6 +24,7 @@ async function getEvent(slug: string) {
     null,
     'eventDetail',
   );
+  return real ?? (findDemo('events', slug) as unknown as typeof real);
 }
 
 export async function generateMetadata({

@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Pagination } from '@/components/ui/pagination';
 import { EmptyState } from '@/components/ui/misc';
+import { demoFallback, demoResearchers } from '@/lib/demo-data';
 import { pageArgs, textWhere } from '@/lib/services/list-helpers';
 import { DISCIPLINE_LABELS, POLE_LABELS } from '@/lib/constants';
 import { truncate } from '@/lib/utils';
@@ -58,6 +59,8 @@ export default async function ResearchersPage({
       'researchersInstitutions',
     ),
   ]);
+  const active = Boolean(get('q') || get('primaryPole') || get('institutionId') || page > 1);
+  const { items: shown, isDemo } = demoFallback(items, demoResearchers, { active });
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
 
   return (
@@ -85,10 +88,10 @@ export default async function ResearchersPage({
             },
           ]}
         />
-        {items.length ? (
+        {shown.length ? (
           <>
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {items.map((r) => (
+              {shown.map((r) => (
                 <Link key={r.id} href={`/researchers/${r.slug}`}>
                   <Card className="h-full transition-shadow hover:shadow-md">
                     <CardContent className="p-5">
@@ -125,7 +128,7 @@ export default async function ResearchersPage({
                 </Link>
               ))}
             </div>
-            <Pagination page={page} pageCount={pageCount} />
+            {!isDemo ? <Pagination page={page} pageCount={pageCount} /> : null}
           </>
         ) : (
           <EmptyState title="No researchers found" description="Seed the database to load demo researcher profiles." />

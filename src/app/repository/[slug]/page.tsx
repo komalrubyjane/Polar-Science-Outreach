@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ExternalLink, Download, Building2, MapPin } from 'lucide-react';
 import { prisma } from '@/lib/db';
+import { findDemo } from '@/lib/demo-data';
 import { safe } from '@/lib/safe';
 import { auth } from '@/auth';
 import { incrementResearchView, getRelatedResearch } from '@/lib/services/research';
@@ -30,7 +31,7 @@ import {
 export const dynamic = 'force-dynamic';
 
 async function getResearch(slug: string) {
-  return safe(
+  const real = await safe(
     () =>
       prisma.research.findFirst({
         where: { slug },
@@ -39,6 +40,7 @@ async function getResearch(slug: string) {
     null,
     'researchDetail',
   );
+  return real ?? (findDemo('research', slug) as unknown as typeof real);
 }
 
 export async function generateMetadata({

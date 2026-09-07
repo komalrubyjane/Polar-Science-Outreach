@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/db';
+import { findDemo } from '@/lib/demo-data';
 import { safe } from '@/lib/safe';
 import { auth } from '@/auth';
 import { renderMarkdown, readingTime } from '@/lib/markdown';
@@ -15,7 +16,7 @@ import { NEWS_CATEGORY_LABELS } from '@/lib/constants';
 export const dynamic = 'force-dynamic';
 
 async function getArticle(slug: string) {
-  return safe(
+  const real = await safe(
     () =>
       prisma.newsArticle.findFirst({
         where: { slug },
@@ -27,6 +28,7 @@ async function getArticle(slug: string) {
     null,
     'newsDetail',
   );
+  return real ?? (findDemo('news', slug) as unknown as typeof real);
 }
 
 export async function generateMetadata({

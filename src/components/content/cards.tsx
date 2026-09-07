@@ -44,7 +44,7 @@ function CardShell({
   return (
     <Link
       href={href}
-      className="group flex h-full flex-col border border-border bg-surface transition-colors duration-300 ease-editorial hover:border-foreground/30"
+      className="card-ios group flex h-full flex-col overflow-hidden"
     >
       <div className={`relative ${aspect} w-full overflow-hidden`}>
         <SmartImage
@@ -177,7 +177,7 @@ export function MediaCard({ data }: { data: MediaCardData }) {
   return (
     <Link
       href={`/media/${data.slug}`}
-      className="group relative block overflow-hidden border border-border bg-surface"
+      className="card-ios group relative block overflow-hidden"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden">
         <SmartImage
@@ -389,7 +389,7 @@ export function TopicCard({ data }: { data: TopicCardData }) {
   return (
     <Link
       href={`/explore/${data.slug}`}
-      className="group flex flex-col justify-between border border-border bg-surface p-6 transition-colors duration-300 ease-editorial hover:border-foreground/30"
+      className="card-ios group flex flex-col justify-between overflow-hidden p-6"
     >
       <div
         className="mb-6 h-24 w-full opacity-80 transition-opacity group-hover:opacity-100"
