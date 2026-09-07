@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter, Space_Grotesk, Instrument_Serif } from 'next/font/google';
+import { Inter, Fraunces, Instrument_Serif } from 'next/font/google';
 import './globals.css';
 import { SITE } from '@/lib/constants';
 import { env } from '@/lib/env';
@@ -17,11 +17,12 @@ const inter = Inter({
   variable: '--font-sans',
   display: 'swap',
 });
-const display = Space_Grotesk({
+const display = Fraunces({
   subsets: ['latin'],
   variable: '--font-display',
   display: 'swap',
-  weight: ['400', '500', '600', '700'],
+  style: ['normal', 'italic'],
+  axes: ['opsz'],
 });
 const serif = Instrument_Serif({
   subsets: ['latin'],

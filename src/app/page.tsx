@@ -400,8 +400,9 @@ export default async function HomePage() {
       </section>
 
       {/* ─────────────────────── NEWSLETTER ─────────────────────── */}
-      <section className="editorial py-24 sm:py-32">
-        <div className="grid gap-10 rounded-card-lg border border-polar-navy/10 bg-polar-glacier p-8 text-polar-navy sm:p-14 lg:grid-cols-[1fr_0.8fr] lg:items-center">
+      <section className="aurora-bg border-t border-border">
+        <div className="editorial py-24 sm:py-32">
+        <div className="glass grid gap-10 rounded-card-xl p-8 text-polar-navy sm:p-14 lg:grid-cols-[1fr_0.8fr] lg:items-center">
           <div>
             <Eyebrow className="text-polar-ocean">
               <span className="h-px w-6 bg-current" aria-hidden />
@@ -415,9 +416,10 @@ export default async function HomePage() {
               anytime.
             </p>
           </div>
-          <div className="[&_input]:border-polar-navy/20 [&_input]:bg-white [&_input]:text-polar-navy [&_input]:placeholder:text-polar-navy/40 [&_button]:bg-polar-ocean [&_button]:text-white [&_button]:hover:bg-polar-navy">
+          <div className="[&_input]:border-polar-navy/20 [&_input]:bg-white/70 [&_input]:text-polar-navy [&_input]:placeholder:text-polar-navy/40 [&_button]:bg-polar-ocean [&_button]:text-white [&_button]:hover:bg-polar-navy">
             <NewsletterForm source="homepage" />
           </div>
+        </div>
         </div>
       </section>
     </>

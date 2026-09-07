@@ -77,12 +77,19 @@ abstract class BaseProvider implements DataProvider {
     const skel = this.skeleton(id);
     if (!skel) return null;
 
-    if (this.endpoint) {
+    // In DEMO_MODE we don't touch the network — these domains have no
+    // purpose-built series endpoint yet, so a fetch would only fail slowly and
+    // fall through to demo anyway. In production we try the endpoint once, with
+    // a hard timeout so a hung upstream can't stall rendering or the build.
+    if (this.endpoint && !DEMO_MODE) {
       try {
         const res = await fetch(`${this.endpoint}?series=${encodeURIComponent(id)}`, {
           next: { revalidate: 60 * 60 * 3 },
+          signal: AbortSignal.timeout(5000),
         });
         if (!res.ok) throw new Error(`upstream ${res.status}`);
+        const ct = res.headers.get('content-type') ?? '';
+        if (!ct.includes('json')) throw new Error(`non-JSON upstream (${ct || 'unknown'})`);
         const json = (await res.json()) as Partial<NormalizedSeries>;
         if (!Array.isArray(json.points) || json.points.length === 0) {
           throw new Error('empty upstream payload');

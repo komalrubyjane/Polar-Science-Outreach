@@ -152,10 +152,10 @@
   }
 
   h1, h2, h3, h4 {
-    font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--font-display), ui-serif, Georgia, serif;
     font-weight: 500;
-    letter-spacing: -0.02em;
-    line-height: 1.02;
+    letter-spacing: -0.012em;
+    line-height: 1.06;
   }
 
   * {
@@ -193,25 +193,25 @@
   }
 
   .display-hero {
-    font-family: var(--font-display);
+    font-family: var(--font-display), ui-serif, Georgia, serif;
     font-weight: 500;
-    letter-spacing: -0.035em;
-    line-height: 0.92;
+    letter-spacing: -0.022em;
+    line-height: 0.98;
     font-size: clamp(3.25rem, 12vw, 11rem);
   }
   .display-1 {
-    font-family: var(--font-display); font-weight: 500;
-    letter-spacing: -0.03em; line-height: 0.98;
+    font-family: var(--font-display), ui-serif, Georgia, serif; font-weight: 500;
+    letter-spacing: -0.018em; line-height: 1.02;
     font-size: clamp(2.75rem, 7vw, 6rem);
   }
   .display-2 {
-    font-family: var(--font-display); font-weight: 500;
-    letter-spacing: -0.025em; line-height: 1.02;
+    font-family: var(--font-display), ui-serif, Georgia, serif; font-weight: 500;
+    letter-spacing: -0.014em; line-height: 1.06;
     font-size: clamp(2rem, 4.4vw, 3.75rem);
   }
   .display-3 {
-    font-family: var(--font-display); font-weight: 500;
-    letter-spacing: -0.02em; line-height: 1.1;
+    font-family: var(--font-display), ui-serif, Georgia, serif; font-weight: 500;
+    letter-spacing: -0.01em; line-height: 1.14;
     font-size: clamp(1.35rem, 2.1vw, 2rem);
   }
   .editorial-lead {
@@ -303,6 +303,13 @@
       radial-gradient(46% 90% at 88% 0%, rgb(168 190 205 / 0.22), transparent 55%),
       radial-gradient(90% 120% at 50% 100%, rgb(201 217 227 / 0.40), transparent 62%),
       rgb(var(--background));
+    background-size: 180% 180%, 180% 180%, 200% 200%, 100% 100%;
+    animation: aurora-drift 26s ease-in-out infinite alternate;
+  }
+
+  /* Page-transition entrance (see app/template.tsx) */
+  .page-enter {
+    animation: page-enter 0.62s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
   /* very subtle "light across water" sheen */
   .water-sheen {
@@ -418,6 +425,14 @@
   0%, 100% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
 }
+@keyframes aurora-drift {
+  0%   { background-position: 0% 0%, 100% 0%, 50% 100%, 0 0; }
+  100% { background-position: 30% 20%, 70% 10%, 50% 80%, 0 0; }
+}
+@keyframes page-enter {
+  from { opacity: 0; transform: translate3d(0, 14px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
 
 /* Each layer travels an integer number of its own tile so the loop is seamless
    on both axes; the small horizontal component gives a gentle crossing drift. */
@@ -491,6 +506,8 @@
   .float-slow { animation: none !important; }
   .water-sheen { animation: none !important; }
   .skeleton { animation: none !important; }
+  .aurora-bg { animation: none !important; }
+  .page-enter { animation: none !important; }
   /* no motion → no snow */
   .snow-layer { display: none !important; }
 }

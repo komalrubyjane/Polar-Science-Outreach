@@ -47,10 +47,10 @@ export function SiteHeader() {
         'fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,height,color,box-shadow] duration-500 ease-editorial',
         transparent && 'border-b border-transparent bg-transparent text-white',
         glassDark &&
-          'border-b border-white/12 bg-[rgb(7_31_50_/_0.55)] text-white shadow-[0_10px_40px_rgb(7_31_50_/_0.18)] [backdrop-filter:blur(20px)_saturate(140%)]',
+          'border-b border-white/12 bg-[rgb(34_47_57_/_0.5)] text-white shadow-[0_10px_40px_rgb(40_57_70_/_0.18)] [backdrop-filter:blur(22px)_saturate(150%)]',
         !transparent &&
           !glassDark &&
-          'border-b border-border bg-[rgb(var(--surface)_/_0.7)] text-foreground shadow-[0_10px_40px_rgb(7_31_50_/_0.08)] [backdrop-filter:blur(20px)_saturate(140%)]',
+          'border-b border-border bg-[rgb(var(--surface)_/_0.62)] text-foreground shadow-[0_10px_40px_rgb(40_57_70_/_0.08)] [backdrop-filter:blur(22px)_saturate(150%)]',
       )}
       style={{ ['--_h' as string]: scrolled ? '4.25rem' : '5.25rem' }}
     >
@@ -100,12 +100,12 @@ export function SiteHeader() {
             <button className="flex items-center gap-1 px-3 py-2 text-xs font-medium uppercase tracking-[0.16em] opacity-60 transition-opacity hover:opacity-100">
               More <Plus className="h-3 w-3" />
             </button>
-            <div className="invisible absolute right-0 top-full w-56 border border-border bg-popover p-1.5 text-foreground opacity-0 shadow-2xl transition-all duration-300 group-hover:visible group-hover:opacity-100">
+            <div className="glass invisible absolute right-0 top-full mt-2 w-56 rounded-2xl p-1.5 text-foreground opacity-0 transition-all duration-300 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 [transform:translateY(6px)]">
               {EDITORIAL_NAV_MORE.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="block px-3 py-2 text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                  className="block rounded-xl px-3 py-2 text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                 >
                   {item.label}
                 </Link>
