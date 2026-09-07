@@ -58,7 +58,7 @@ export function CinematicHero({
   return (
     <section
       ref={ref}
-      className="grain relative isolate -mt-[var(--header-h)] flex w-full flex-col overflow-hidden bg-navy"
+      className="grain relative isolate -mt-[var(--header-h)] flex w-full flex-col overflow-hidden bg-polar-ocean"
       style={{ minHeight: minH }}
     >
       <div

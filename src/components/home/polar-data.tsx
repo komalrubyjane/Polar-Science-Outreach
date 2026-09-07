@@ -152,31 +152,31 @@ export async function DataTeaser() {
   const unavailable = !series || series.unavailable || values.length < 2;
 
   return (
-    <section className="bg-polar-navy text-polar-text-light [&_.eyebrow]:text-polar-glacier [&_.hairline]:bg-white/15">
+    <section className="border-y border-polar-navy/10 bg-polar-glacier text-polar-navy [&_.eyebrow]:text-polar-ocean [&_.hairline]:bg-polar-navy/15">
       <div className="editorial py-24 sm:py-36">
         <SectionHeading
           index="04"
           kicker="Polar Data"
-          title={<span className="text-white">The ice is moving.</span>}
+          title={<span className="text-polar-navy">The ice is moving.</span>}
           lead={
-            <span className="text-polar-text-muted">
+            <span className="text-polar-navy/70">
               Real monthly sea-ice extent from the NSIDC Sea Ice Index, refreshed every six
               hours. Every series carries its source, unit and citation.
             </span>
           }
           action={
-            <EditorialLink href="/data" className="text-polar-glacier hover:text-white">
+            <EditorialLink href="/data" className="text-polar-ocean hover:text-polar-navy">
               Full data
             </EditorialLink>
           }
         />
 
         {unavailable ? (
-          <div className="glass-dark max-w-lg rounded-card p-6">
-            <p className="font-display text-lg text-white">Data temporarily unavailable</p>
-            <p className="mt-2 text-sm text-polar-text-muted">
+          <div className="glass max-w-lg rounded-card p-6">
+            <p className="font-display text-lg text-polar-navy">Data temporarily unavailable</p>
+            <p className="mt-2 text-sm text-polar-navy/70">
               The NSIDC Sea Ice Index did not respond. No fabricated values are shown. Try the{' '}
-              <Link href="/data" className="text-polar-glacier underline">
+              <Link href="/data" className="text-polar-ocean underline">
                 full data page
               </Link>{' '}
               again shortly.
@@ -185,30 +185,30 @@ export async function DataTeaser() {
         ) : (
           <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
             <div>
-              <p className="metadata text-polar-text-muted">
+              <p className="metadata text-polar-navy/60">
                 Arctic sea ice extent — latest monthly mean
               </p>
-              <p className="mt-4 font-display text-6xl font-medium tracking-tight text-white sm:text-7xl">
+              <p className="mt-4 font-display text-6xl font-medium tracking-tight text-polar-navy sm:text-7xl">
                 <AnimatedNumber value={last!} decimals={2} />
-                <span className="ml-2 align-top text-2xl text-polar-text-muted">M km²</span>
+                <span className="ml-2 align-top text-2xl text-polar-navy/60">M km²</span>
               </p>
               <p className="mt-3 text-sm">
-                <span className={pct < 0 ? 'text-polar-glacier' : 'text-warning'}>
+                <span className={pct < 0 ? 'text-polar-ocean' : 'text-warning'}>
                   {pct > 0 ? '+' : ''}
                   {pct.toFixed(1)}%
                 </span>{' '}
-                <span className="text-polar-text-muted">across the last ~9 years</span>
+                <span className="text-polar-navy/60">across the last ~9 years</span>
               </p>
               <div className="mt-6 flex flex-wrap items-center gap-2">
-                <SourceBadge source="NSIDC Sea Ice Index v3" tone="dark" />
-                <DataFreshness lastUpdated={series!.lastUpdated} className="text-polar-glacier" />
+                <SourceBadge source="NSIDC Sea Ice Index v4" />
+                <DataFreshness lastUpdated={series!.lastUpdated} className="text-polar-ocean" />
               </div>
               <div className="mt-8 flex gap-3">
                 <Button
                   asChild
                   variant="outline"
                   size="sm"
-                  className="border-white/30 text-white hover:bg-white/10 hover:text-white"
+                  className="border-polar-navy/30 text-polar-navy hover:bg-polar-navy/10 hover:text-polar-navy"
                 >
                   <a href={`/api/data/series/${series!.id}?format=csv`}>CSV</a>
                 </Button>
@@ -216,17 +216,17 @@ export async function DataTeaser() {
                   asChild
                   variant="outline"
                   size="sm"
-                  className="border-white/30 text-white hover:bg-white/10 hover:text-white"
+                  className="border-polar-navy/30 text-polar-navy hover:bg-polar-navy/10 hover:text-polar-navy"
                 >
                   <a href={`/api/data/series/${series!.id}?format=json-file`}>JSON</a>
                 </Button>
               </div>
             </div>
-            <div className="flex flex-col justify-end text-polar-glacier">
+            <div className="flex flex-col justify-end text-polar-ocean">
               <div className="h-56 w-full">
                 <Sparkline
                   points={values}
-                  strokeClassName="stroke-polar-glacier text-polar-glacier"
+                  strokeClassName="stroke-polar-ocean text-polar-ocean"
                 />
               </div>
               <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1">
@@ -234,7 +234,7 @@ export async function DataTeaser() {
                   <Link
                     key={t}
                     href="/data"
-                    className="metadata text-polar-text-muted transition-colors hover:text-white"
+                    className="metadata text-polar-navy/60 transition-colors hover:text-polar-navy"
                   >
                     {t}
                   </Link>
@@ -250,7 +250,7 @@ export async function DataTeaser() {
 
 export function DataTeaserSkeleton() {
   return (
-    <section className="bg-polar-navy">
+    <section className="border-y border-polar-navy/10 bg-polar-glacier">
       <div className="editorial py-24 sm:py-36">
         <div className="skeleton h-4 w-40 rounded" />
         <div className="skeleton mt-6 h-14 w-2/3 max-w-xl rounded" />

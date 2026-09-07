@@ -7,7 +7,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   return (
     <div className="-mt-[var(--header-h)] grid min-h-dvh lg:grid-cols-2">
       {/* Editorial image side */}
-      <aside className="relative hidden overflow-hidden bg-navy text-white lg:block">
+      <aside className="relative hidden overflow-hidden bg-polar-ocean text-white lg:block">
         <div className="absolute inset-0">
           <SmartImage
             candidates={img.candidates}

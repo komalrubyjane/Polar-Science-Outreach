@@ -32,7 +32,7 @@ export function PageHero({
     <section
       className={cn(
         'relative isolate overflow-hidden border-b border-border',
-        img ? 'grain bg-navy text-white' : 'bg-surface',
+        img ? 'grain bg-polar-ocean text-white' : 'bg-surface',
       )}
     >
       {img ? (

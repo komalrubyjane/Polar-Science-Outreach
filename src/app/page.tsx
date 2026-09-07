@@ -96,7 +96,7 @@ export default async function HomePage() {
               <Button
                 asChild
                 size="lg"
-                className="hover-arrow bg-polar-snow text-polar-deep-ocean hover:bg-white"
+                className="hover-arrow bg-polar-snow text-polar-ocean hover:bg-white"
               >
                 <Link href="/explore">
                   Explore the Polar World <ArrowRight />
@@ -401,21 +401,21 @@ export default async function HomePage() {
 
       {/* ─────────────────────── NEWSLETTER ─────────────────────── */}
       <section className="editorial py-24 sm:py-32">
-        <div className="grid gap-10 bg-polar-navy p-8 text-polar-text-light sm:p-14 lg:grid-cols-[1fr_0.8fr] lg:items-center">
+        <div className="grid gap-10 rounded-card-lg border border-polar-navy/10 bg-polar-glacier p-8 text-polar-navy sm:p-14 lg:grid-cols-[1fr_0.8fr] lg:items-center">
           <div>
-            <Eyebrow className="text-polar-glacier">
+            <Eyebrow className="text-polar-ocean">
               <span className="h-px w-6 bg-current" aria-hidden />
               The Newsletter
             </Eyebrow>
-            <p className="display-3 mt-4 text-balance text-white">
+            <p className="display-3 mt-4 text-balance text-polar-navy">
               Polar science in your inbox, once a month.
             </p>
-            <p className="mt-4 max-w-md text-polar-text-muted">
+            <p className="mt-4 max-w-md text-polar-navy/75">
               New research, data releases, expeditions and events. Double opt-in; unsubscribe
               anytime.
             </p>
           </div>
-          <div className="[&_input]:border-white/25 [&_input]:bg-white/5 [&_input]:text-white [&_input]:placeholder:text-white/40 [&_button]:bg-white [&_button]:text-polar-navy [&_button]:hover:bg-polar-glacier">
+          <div className="[&_input]:border-polar-navy/20 [&_input]:bg-white [&_input]:text-polar-navy [&_input]:placeholder:text-polar-navy/40 [&_button]:bg-polar-ocean [&_button]:text-white [&_button]:hover:bg-polar-navy">
             <NewsletterForm source="homepage" />
           </div>
         </div>

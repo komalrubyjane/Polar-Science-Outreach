@@ -41,7 +41,7 @@ export function MobileNav() {
 
       <div
         className={cn(
-          'fixed inset-0 z-[60] bg-navy text-white transition-[opacity,visibility] duration-500 ease-editorial lg:hidden',
+          'fixed inset-0 z-[60] bg-polar-snow text-polar-navy transition-[opacity,visibility] duration-500 ease-editorial lg:hidden',
           open ? 'visible opacity-100' : 'invisible opacity-0',
         )}
         role="dialog"
@@ -56,7 +56,7 @@ export function MobileNav() {
           <button
             onClick={() => setOpen(false)}
             aria-label="Close menu"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-white/10"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-polar-navy/10"
           >
             <X className="h-5 w-5" />
           </button>
@@ -71,8 +71,8 @@ export function MobileNav() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'flex items-baseline gap-4 border-b border-white/10 py-5 transition-colors',
-                  active ? 'text-white' : 'text-white/70 hover:text-white',
+                  'flex items-baseline gap-4 border-b border-polar-navy/10 py-5 transition-colors',
+                  active ? 'text-polar-navy' : 'text-polar-navy/60 hover:text-polar-navy',
                 )}
                 style={{
                   transitionDelay: open ? `${80 + i * 45}ms` : '0ms',
@@ -83,7 +83,7 @@ export function MobileNav() {
                   transitionTimingFunction: 'cubic-bezier(0.22,1,0.36,1)',
                 }}
               >
-                <span className="metadata text-white/40">
+                <span className="metadata text-polar-navy/40">
                   {String(i).padStart(2, '0')}
                 </span>
                 <span className="display-3 font-display">{item.label}</span>
@@ -97,7 +97,7 @@ export function MobileNav() {
             <Link
               key={item.href}
               href={item.href}
-              className="metadata text-white/60 transition-colors hover:text-white"
+              className="metadata text-polar-navy/60 transition-colors hover:text-polar-navy"
             >
               {item.label}
             </Link>
@@ -107,13 +107,13 @@ export function MobileNav() {
         <div className="editorial mt-10 flex gap-4">
           <Link
             href="/login"
-            className="metadata border border-white/25 px-5 py-3 transition-colors hover:bg-white hover:text-navy"
+            className="metadata border border-polar-navy/25 px-5 py-3 transition-colors hover:bg-polar-navy hover:text-white"
           >
             Log in
           </Link>
           <Link
             href="/bookmarks"
-            className="metadata border border-white/25 px-5 py-3 transition-colors hover:bg-white hover:text-navy"
+            className="metadata border border-polar-navy/25 px-5 py-3 transition-colors hover:bg-polar-navy hover:text-white"
           >
             Bookmarks
           </Link>

@@ -1,4 +1,5 @@
 import { cache } from 'react';
+import { unstable_cache } from 'next/cache';
 import { env } from '@/lib/env';
 import { logger } from '@/lib/logger';
 import type { SeriesPoint } from './types';
@@ -7,8 +8,12 @@ import type { SeriesPoint } from './types';
  * NSIDC Sea Ice Index (Version 4) — real, public, no credentials required.
  *
  * We read the daily sea-ice-extent CSV published by NSIDC at NOAA@NSIDC and
- * aggregate it to monthly means for charting. Fetches are cached for 6 hours
- * (Next.js data cache) and deduplicated across the request.
+ * aggregate it to monthly means for charting.
+ *
+ * The raw CSV is ~2.5 MB — larger than Next.js' 2 MB fetch-cache entry limit —
+ * so we fetch it uncached (`no-store`) and instead cache the small *parsed*
+ * result with `unstable_cache` for 6 hours. React `cache()` dedupes calls
+ * within a single request.
  *
  * Source: https://nsidc.org/data/seaice_index  ·  https://nsidc.org/data/g02135
  * Citation: Fetterer, F., K. Knowles, W. N. Meier, M. Savoie, and A. K. Windnagel.
@@ -38,15 +43,14 @@ function csvUrl(hemisphere: 'north' | 'south'): string {
   return `${BASE}/${hemisphere}/daily/data/${h}_seaice_extent_daily_v4.0.csv`;
 }
 
-/** Fetch + parse + monthly-aggregate NSIDC daily sea-ice extent. */
-export const fetchNsidcSeaIce = cache(
-  async (
-    hemisphere: "north" | "south",
-    yearsBack = 9,
-  ): Promise<NsidcResult> => {
+/** Fetch + parse + monthly-aggregate NSIDC daily sea-ice extent (uncached body). */
+async function loadNsidcSeaIce(
+  hemisphere: 'north' | 'south',
+  yearsBack: number,
+): Promise<NsidcResult> {
   const url = csvUrl(hemisphere);
   const res = await fetch(url, {
-    next: { revalidate: 60 * 60 * 6 },
+    cache: 'no-store',
     headers: { accept: 'text/csv' },
   });
   if (!res.ok) throw new Error(`NSIDC ${res.status} for ${url}`);
@@ -90,6 +94,19 @@ export const fetchNsidcSeaIce = cache(
     lastObservation,
   });
 
-    return { points, lastObservation };
-  },
+  return { points, lastObservation };
+}
+
+/** 6-hour cache of the small parsed result, keyed by hemisphere + window. */
+const cachedNsidcSeaIce = unstable_cache(
+  (hemisphere: 'north' | 'south', yearsBack: number) =>
+    loadNsidcSeaIce(hemisphere, yearsBack),
+  ['nsidc-sea-ice-v4'],
+  { revalidate: 60 * 60 * 6 },
+);
+
+/** Public entry point — per-request dedupe over the 6-hour result cache. */
+export const fetchNsidcSeaIce = cache(
+  (hemisphere: 'north' | 'south', yearsBack = 9): Promise<NsidcResult> =>
+    cachedNsidcSeaIce(hemisphere, yearsBack),
 );
