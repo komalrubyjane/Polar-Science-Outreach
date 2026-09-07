@@ -13,10 +13,10 @@ import {
   YAxis,
 } from 'recharts';
 
-/** Controlled scientific blue palette (see design tokens --chart-*). */
+/** Controlled pale sky-blue palette (see design tokens --chart-*). */
 const PALETTE = [
-  '#3D5A6B', '#708794', '#A4B4C0', '#2F4A5A', '#CFD9DF',
-  '#5F6E78', '#2A343C', '#E1E7EB', '#4A6373', '#8FA0AC', '#607884',
+  '#3A6178', '#6A8FA5', '#96B4C5', '#476A81', '#BED4E0',
+  '#5B6F7B', '#2B3B47', '#5E8399', '#89A6B6', '#7597A9', '#456E85',
 ];
 
 const AXIS = 'rgb(var(--muted-foreground))';
@@ -31,7 +31,7 @@ const tooltipStyle = {
 
 export function GrowthChart({
   data,
-  color = '#3D5A6B',
+  color = '#3A6178',
 }: {
   data: { month: string; count: number }[];
   color?: string;

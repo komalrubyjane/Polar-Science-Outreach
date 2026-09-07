@@ -15,11 +15,11 @@ export interface MapFeature {
 }
 
 const LAYER_META: Record<string, { label: string; color: string }> = {
-  stations: { label: 'Research stations', color: '#3D5A6B' },
-  expeditions: { label: 'Expeditions', color: '#708794' },
-  observations: { label: 'Observation sites', color: '#A4B4C0' },
-  projects: { label: 'Research projects', color: '#5F6E78' },
-  protectedAreas: { label: 'Protected areas', color: '#2F4A5A' },
+  stations: { label: 'Research stations', color: '#3A6178' },
+  expeditions: { label: 'Expeditions', color: '#6A8FA5' },
+  observations: { label: 'Observation sites', color: '#96B4C5' },
+  projects: { label: 'Research projects', color: '#5B6F7B' },
+  protectedAreas: { label: 'Protected areas', color: '#476A81' },
 };
 
 const TILE_URL =
@@ -54,7 +54,7 @@ export function PolarMap({
         url={TILE_URL}
       />
       {visible.map((f) => {
-        const meta = LAYER_META[f.layer] ?? { label: f.layer, color: '#3D5A6B' };
+        const meta = LAYER_META[f.layer] ?? { label: f.layer, color: '#3A6178' };
         return (
           <CircleMarker
             key={`${f.layer}-${f.id}`}
@@ -64,18 +64,18 @@ export function PolarMap({
           >
             <Popup>
               <div className="space-y-1">
-                <p className="text-xs font-semibold uppercase tracking-wide text-[#5F6E78]">
+                <p className="text-xs font-semibold uppercase tracking-wide text-[#5B6F7B]">
                   {meta.label}
                 </p>
                 <p className="font-medium">{f.name}</p>
                 {f.description ? (
-                  <p className="text-sm text-[#262F36]">{f.description}</p>
+                  <p className="text-sm text-[#283946]">{f.description}</p>
                 ) : null}
-                <p className="text-xs text-[#5F6E78]">
+                <p className="text-xs text-[#5B6F7B]">
                   {f.lat.toFixed(3)}°, {f.lng.toFixed(3)}°
                 </p>
                 {f.href ? (
-                  <a href={f.href} className="text-sm text-[#3D5A6B] underline">
+                  <a href={f.href} className="text-sm text-[#3A6178] underline">
                     Open details
                   </a>
                 ) : null}

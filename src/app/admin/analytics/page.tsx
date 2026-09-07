@@ -41,7 +41,7 @@ export default async function AdminAnalyticsPage() {
         <CardContent>
           <GrowthChart
             data={summary.pageViewsByDay.map((d) => ({ month: d.date, count: d.count }))}
-            color="#3D5A6B"
+            color="#3A6178"
           />
         </CardContent>
       </Card>

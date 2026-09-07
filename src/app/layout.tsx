@@ -9,6 +9,7 @@ import { SiteFooter } from '@/components/navigation/site-footer';
 import { Toaster } from '@/components/ui/toaster';
 import { CookieConsent } from '@/components/cookie-consent';
 import { AnalyticsTracker } from '@/components/analytics-tracker';
+import { SnowLayer } from '@/components/snow';
 import { Suspense } from 'react';
 
 const inter = Inter({
@@ -67,7 +68,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#FFFFFF' },
-    { media: '(prefers-color-scheme: dark)', color: '#1E272E' },
+    { media: '(prefers-color-scheme: dark)', color: '#161D23' },
   ],
   width: 'device-width',
   initialScale: 1,
@@ -83,6 +84,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <body className="min-h-dvh bg-background font-sans text-foreground antialiased">
         <Providers>
+          <SnowLayer />
           <a href="#main-content" className="skip-link">
             Skip to main content
           </a>
