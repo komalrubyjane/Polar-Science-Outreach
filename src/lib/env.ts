@@ -15,7 +15,16 @@ const schema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   NEXT_PUBLIC_APP_URL: z.string().url().default('http://localhost:3000'),
 
-  DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
+  /**
+   * Real value MUST be provided in any environment that needs data (set it in
+   * the host's env-var UI). We fall back to an unroutable placeholder so a
+   * deploy still builds and boots — every DB call is wrapped in `safe()`, so
+   * pages then render with empty / demonstration states instead of 500s.
+   */
+  DATABASE_URL: z
+    .string()
+    .min(1)
+    .default('postgresql://placeholder:placeholder@127.0.0.1:5432/placeholder'),
   DIRECT_URL: z.string().optional().default(''),
 
   AUTH_SECRET: z
@@ -110,6 +119,24 @@ if (!parsed.success) {
 }
 
 export const env = parsed.data;
+
+/** True when no real database URL was supplied (running on the placeholder). */
+export const databaseConfigured = !env.DATABASE_URL.includes('placeholder:placeholder@127.0.0.1');
+
+if (!databaseConfigured) {
+  console.warn(
+    '[env] DATABASE_URL is not set — using an unroutable placeholder. ' +
+      'The app will build and boot, but every database query will fail and ' +
+      'pages will render empty / demonstration states. Set DATABASE_URL in ' +
+      "the host's environment variables for real data.",
+  );
+}
+if (
+  env.NODE_ENV === 'production' &&
+  env.AUTH_SECRET === 'dev-only-insecure-secret-change-me-please-0000000000'
+) {
+  console.warn('[env] AUTH_SECRET is the insecure default — set a real secret in production.');
+}
 
 export const isProd = env.NODE_ENV === 'production';
 export const isTest = env.NODE_ENV === 'test';

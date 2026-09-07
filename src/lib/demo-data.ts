@@ -535,10 +535,14 @@ let _demoMode: boolean | null = null;
 export function demoEnabled(): boolean {
   if (_demoMode === null) {
     // Read lazily so this module stays importable from any context.
-    _demoMode =
-      (typeof process !== 'undefined' &&
-        (process.env.DEMO_MODE === 'true' || process.env.DEMO_MODE === '1')) ||
-      false;
+    const flag =
+      typeof process !== 'undefined' &&
+      (process.env.DEMO_MODE === 'true' || process.env.DEMO_MODE === '1');
+    // Also fall back to demo content when no real database is configured, so a
+    // fresh deploy (unset / placeholder DATABASE_URL) still looks populated.
+    const rawDb = typeof process !== 'undefined' ? process.env.DATABASE_URL : undefined;
+    const noDb = !rawDb || rawDb.includes('placeholder:placeholder@127.0.0.1');
+    _demoMode = Boolean(flag || noDb);
   }
   return _demoMode;
 }
