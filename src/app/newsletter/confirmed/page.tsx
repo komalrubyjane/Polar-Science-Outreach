@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: 'Subscription confirmed' };
 export default function NewsletterConfirmedPage() {
   return (
     <div className="container-page flex min-h-[60vh] flex-col items-center justify-center py-16 text-center">
-      <CheckCircle2 className="mb-4 h-12 w-12 text-emerald-500" />
+      <CheckCircle2 className="mb-4 h-12 w-12 text-success" />
       <h1 className="font-display text-2xl font-semibold">You&apos;re subscribed</h1>
       <p className="mt-2 max-w-md text-muted-foreground">
         Thanks for confirming. You&apos;ll receive the monthly polar science digest. Every email

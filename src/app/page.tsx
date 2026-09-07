@@ -86,7 +86,7 @@ export default async function HomePage() {
             Antarctic.
           </p>
           <div className="mt-10 flex flex-wrap items-center gap-4">
-            <Button asChild size="lg" className="hover-arrow bg-white text-navy hover:bg-white/90">
+            <Button asChild size="lg" className="hover-arrow bg-polar-snow text-polar-deep-ocean hover:bg-white">
               <Link href="/explore">
                 Explore Polar Science <ArrowRight />
               </Link>
@@ -95,7 +95,7 @@ export default async function HomePage() {
               asChild
               size="lg"
               variant="outline"
-              className="border-white/35 text-white hover:border-white hover:bg-white/10 hover:text-white"
+              className="border-white/45 text-white hover:bg-white/10 hover:text-white"
             >
               <Link href="/data">View Data</Link>
             </Button>
@@ -241,56 +241,73 @@ export default async function HomePage() {
       </section>
 
       {/* ─────────────────────── 03 DATA ─────────────────────── */}
-      <section className="border-y border-border bg-surface">
+      <section className="bg-polar-navy text-polar-text-light [&_.hairline]:bg-white/15 [&_.eyebrow]:text-polar-glacier">
         <div className="editorial py-24 sm:py-36">
           <SectionHeading
             index="03"
             kicker="Polar Data"
-            title="The ice is moving."
-            lead="Interactive time-series for the polar environment. Every series carries its source, unit and methodology."
-            action={<EditorialLink href="/data">Full data</EditorialLink>}
+            title={<span className="text-white">The ice is moving.</span>}
+            lead={
+              <span className="text-polar-text-muted">
+                Interactive time-series for the polar environment. Every series carries its
+                source, unit and methodology.
+              </span>
+            }
+            action={
+              <EditorialLink href="/data" className="text-polar-glacier hover:text-white">
+                Full data
+              </EditorialLink>
+            }
           />
 
           <Reveal className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
             <div>
-              <p className="metadata">Arctic sea ice extent — latest demo value</p>
-              <p className="mt-4 font-display text-6xl font-medium tracking-tight sm:text-7xl">
+              <p className="metadata text-polar-text-muted">
+                Arctic sea ice extent — latest demo value
+              </p>
+              <p className="mt-4 font-display text-6xl font-medium tracking-tight text-white sm:text-7xl">
                 {seaIce.last}
-                <span className="ml-2 align-top text-2xl text-muted-foreground">M km²</span>
+                <span className="ml-2 align-top text-2xl text-polar-text-muted">M km²</span>
               </p>
               <p className="mt-3 text-sm">
-                <span
-                  className={
-                    seaIce.pct < 0 ? 'text-accent' : 'text-amber-500'
-                  }
-                >
+                <span className={seaIce.pct < 0 ? 'text-polar-glacier' : 'text-warning'}>
                   {seaIce.pct > 0 ? '+' : ''}
                   {seaIce.pct.toFixed(1)}%
                 </span>{' '}
-                <span className="text-muted-foreground">across the demo record</span>
+                <span className="text-polar-text-muted">across the demo record</span>
               </p>
-              <div className="mt-8 inline-flex border border-dashed border-amber-500/50 bg-amber-500/[0.06] px-3 py-2 text-xs font-medium text-amber-600 dark:text-amber-300">
+              <div className="mt-8 inline-flex border border-dashed border-white/25 bg-white/5 px-3 py-2 text-xs font-medium text-polar-glacier">
                 Demo dataset — illustrative values, not a live measurement.
               </div>
               <div className="mt-8 flex gap-3">
-                <Button asChild variant="outline" size="sm">
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="border-white/30 text-white hover:bg-white/10 hover:text-white"
+                >
                   <a href={`/api/data/series/${seaIce.series.id}?format=csv`}>CSV</a>
                 </Button>
-                <Button asChild variant="outline" size="sm">
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="border-white/30 text-white hover:bg-white/10 hover:text-white"
+                >
                   <a href={`/api/data/series/${seaIce.series.id}?format=json-file`}>JSON</a>
                 </Button>
               </div>
             </div>
-            <div className="flex flex-col justify-end">
-              <div className="h-56 w-full text-accent">
-                <Sparkline points={seaIce.values} />
+            <div className="flex flex-col justify-end text-polar-glacier">
+              <div className="h-56 w-full">
+                <Sparkline points={seaIce.values} strokeClassName="stroke-polar-glacier text-polar-glacier" />
               </div>
               <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1">
                 {['Sea Ice', 'Climate', 'Ocean', 'Cryosphere'].map((t) => (
                   <Link
                     key={t}
                     href="/data"
-                    className="metadata text-muted-foreground transition-colors hover:text-foreground"
+                    className="metadata text-polar-text-muted transition-colors hover:text-white"
                   >
                     {t}
                   </Link>
@@ -429,18 +446,23 @@ export default async function HomePage() {
 
       {/* ─────────────────────── NEWSLETTER ─────────────────────── */}
       <section className="editorial py-24 sm:py-32">
-        <div className="grid gap-10 border border-border p-8 sm:p-14 lg:grid-cols-[1fr_0.8fr] lg:items-center">
+        <div className="grid gap-10 bg-polar-navy p-8 text-polar-text-light sm:p-14 lg:grid-cols-[1fr_0.8fr] lg:items-center">
           <div>
-            <Eyebrow accent>The Newsletter</Eyebrow>
-            <p className="display-3 mt-4 text-balance">
+            <Eyebrow className="text-polar-glacier">
+              <span className="h-px w-6 bg-current" aria-hidden />
+              The Newsletter
+            </Eyebrow>
+            <p className="display-3 mt-4 text-balance text-white">
               Polar science in your inbox, once a month.
             </p>
-            <p className="mt-4 max-w-md text-muted-foreground">
+            <p className="mt-4 max-w-md text-polar-text-muted">
               New research, data releases, expeditions and events. Double opt-in; unsubscribe
               anytime.
             </p>
           </div>
-          <NewsletterForm source="homepage" />
+          <div className="[&_input]:border-white/25 [&_input]:bg-white/5 [&_input]:text-white [&_input]:placeholder:text-white/40 [&_button]:bg-white [&_button]:text-polar-navy [&_button]:hover:bg-polar-glacier">
+            <NewsletterForm source="homepage" />
+          </div>
         </div>
       </section>
     </>

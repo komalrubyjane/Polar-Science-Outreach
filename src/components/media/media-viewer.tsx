@@ -29,7 +29,7 @@ export function MediaViewer(props: MediaViewerProps) {
 
   return (
     <>
-      <div className="relative overflow-hidden rounded-xl border border-border bg-black/5 dark:bg-white/5">
+      <div className="relative overflow-hidden border border-border bg-surface-muted">
         {image ? (
           <>
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -40,7 +40,7 @@ export function MediaViewer(props: MediaViewerProps) {
             />
             <button
               onClick={() => setFullscreen(true)}
-              className="absolute right-3 top-3 rounded-md bg-navy/70 p-2 text-white hover:bg-navy"
+              className="absolute right-3 top-3 rounded-md bg-polar-night/70 p-2 text-white hover:bg-navy"
               aria-label="View full screen"
             >
               <Maximize2 className="h-4 w-4" />
@@ -86,7 +86,7 @@ export function MediaViewer(props: MediaViewerProps) {
 
       {fullscreen ? (
         <div
-          className="fixed inset-0 z-[90] flex items-center justify-center bg-navy/95 p-4"
+          className="fixed inset-0 z-[90] flex items-center justify-center bg-polar-night/95 p-4"
           onClick={() => setFullscreen(false)}
           role="dialog"
           aria-modal="true"

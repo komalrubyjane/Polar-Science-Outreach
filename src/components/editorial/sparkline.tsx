@@ -6,7 +6,7 @@ export function Sparkline({
   width = 640,
   height = 140,
   className,
-  strokeClassName = 'stroke-accent',
+  strokeClassName = 'stroke-accent text-accent',
 }: {
   points: number[];
   width?: number;
@@ -37,7 +37,7 @@ export function Sparkline({
           <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
         </linearGradient>
       </defs>
-      <path d={area} className="fill-accent text-accent" fill="url(#spark-fill)" />
+      <path d={area} className={strokeClassName} fill="url(#spark-fill)" />
       <path
         d={d}
         fill="none"

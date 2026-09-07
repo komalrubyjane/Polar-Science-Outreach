@@ -180,7 +180,7 @@ export function DataProvenance({
         </p>
       ) : null}
       {isDemo ? (
-        <p className="mt-3 border border-dashed border-amber-500/50 bg-amber-500/[0.06] px-3 py-2 text-xs font-medium text-amber-600 dark:text-amber-300">
+        <p className="mt-3 border border-dashed border-warning/50 bg-warning/[0.06] px-3 py-2 text-xs font-medium text-warning dark:text-warning">
           Demo / sample dataset — illustrative values for interface demonstration. Not a
           scientific measurement; do not cite.
         </p>

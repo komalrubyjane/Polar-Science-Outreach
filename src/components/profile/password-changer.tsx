@@ -45,7 +45,7 @@ export function PasswordChanger({ mustChange = false }: { mustChange?: boolean }
   return (
     <form onSubmit={submit} className="space-y-4">
       {mustChange ? (
-        <p className="rounded-md border border-amber-500/50 bg-amber-500/10 p-3 text-sm text-amber-800 dark:text-amber-200">
+        <p className="rounded-md border border-warning/50 bg-warning/10 p-3 text-sm text-warning dark:text-warning">
           For security, you must change the password on this account before continuing.
         </p>
       ) : null}

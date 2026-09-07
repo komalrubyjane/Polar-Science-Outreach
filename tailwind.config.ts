@@ -2,6 +2,24 @@ import type { Config } from 'tailwindcss';
 
 const withAlpha = (v: string) => `rgb(var(${v}) / <alpha-value>)`;
 
+/** Fixed polar-blue scale — semantic names, one source of truth. */
+const polar = {
+  ice: '#F4F8FA',
+  snow: '#EAF2F6',
+  'pale-ice': '#D9E8F0',
+  glacier: '#B9D3E2',
+  mist: '#9DB8CC',
+  slate: '#7694B0',
+  blue: '#5F7F9D',
+  ocean: '#315A78',
+  'deep-ocean': '#183B56',
+  navy: '#0B2A43',
+  night: '#061D31',
+  'text-light': '#E8F0F4',
+  'text-muted': '#B8CBD8',
+  'text-dark': '#17364E',
+};
+
 const config: Config = {
   darkMode: 'class',
   content: [
@@ -22,6 +40,7 @@ const config: Config = {
         ring: withAlpha('--ring'),
         background: withAlpha('--background'),
         foreground: withAlpha('--foreground'),
+        field: withAlpha('--field'),
         surface: {
           DEFAULT: withAlpha('--surface'),
           muted: withAlpha('--surface-muted'),
@@ -37,6 +56,14 @@ const config: Config = {
         destructive: {
           DEFAULT: withAlpha('--destructive'),
           foreground: withAlpha('--destructive-foreground'),
+        },
+        success: {
+          DEFAULT: withAlpha('--success'),
+          foreground: withAlpha('--success-foreground'),
+        },
+        warning: {
+          DEFAULT: withAlpha('--warning'),
+          foreground: withAlpha('--warning-foreground'),
         },
         muted: {
           DEFAULT: withAlpha('--surface-muted'),
@@ -54,30 +81,22 @@ const config: Config = {
           DEFAULT: withAlpha('--surface'),
           foreground: withAlpha('--foreground'),
         },
-        ice: {
-          DEFAULT: withAlpha('--ice'),
-          50: '#f0f7fb',
-          100: '#dcecf5',
-          200: '#bcdcec',
-          300: '#8ec4dd',
-          400: '#59a4c7',
-          500: '#3888b0',
-          600: '#2d6d94',
-          700: '#285979',
-          800: '#264b64',
-          900: '#233f55',
-          950: '#152838',
-        },
+        ice: withAlpha('--ice'),
         glacier: withAlpha('--glacier'),
-        aurora: {
-          DEFAULT: withAlpha('--aurora'),
-          green: '#4be0a0',
-          cyan: '#3fd0e0',
-          violet: '#8a7ff0',
-        },
+        aurora: withAlpha('--aurora'),
+        // Legacy alias kept so existing `bg-navy` usages map to the new navy.
         navy: {
-          DEFAULT: '#0b1220',
-          light: '#132033',
+          DEFAULT: polar.navy,
+          light: polar['deep-ocean'],
+        },
+        polar,
+        chart: {
+          1: withAlpha('--chart-1'),
+          2: withAlpha('--chart-2'),
+          3: withAlpha('--chart-3'),
+          4: withAlpha('--chart-4'),
+          5: withAlpha('--chart-5'),
+          6: withAlpha('--chart-6'),
         },
       },
       borderRadius: {
@@ -91,15 +110,9 @@ const config: Config = {
         serif: ['var(--font-serif)', 'Georgia', 'serif'],
         mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
-      letterSpacing: {
-        editorial: '0.16em',
-      },
-      maxWidth: {
-        editorial: '1600px',
-      },
-      transitionTimingFunction: {
-        editorial: 'cubic-bezier(0.22, 1, 0.36, 1)',
-      },
+      letterSpacing: { editorial: '0.16em' },
+      maxWidth: { editorial: '1600px' },
+      transitionTimingFunction: { editorial: 'cubic-bezier(0.22, 1, 0.36, 1)' },
       keyframes: {
         'accordion-down': {
           from: { height: '0' },

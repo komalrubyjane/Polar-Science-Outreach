@@ -57,8 +57,8 @@ export function EventRegistration({
 
   if (registered) {
     return (
-      <div className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 p-4 text-sm">
-        <p className="flex items-center gap-2 font-medium text-emerald-700 dark:text-emerald-300">
+      <div className="rounded-lg border border-success/40 bg-success/10 p-4 text-sm">
+        <p className="flex items-center gap-2 font-medium text-success">
           <CheckCircle2 className="h-4 w-4" /> You’re registered
         </p>
         <button

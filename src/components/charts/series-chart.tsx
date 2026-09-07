@@ -57,33 +57,33 @@ export function SeriesChart({
             <Chart data={points} margin={{ top: 8, right: 16, bottom: 8, left: 0 }}>
               <defs>
                 <linearGradient id="seriesFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(190 70% 42%)" stopOpacity={0.35} />
-                  <stop offset="100%" stopColor="hsl(190 70% 42%)" stopOpacity={0.02} />
+                  <stop offset="0%" stopColor="rgb(var(--chart-1))" stopOpacity={0.35} />
+                  <stop offset="100%" stopColor="rgb(var(--chart-1))" stopOpacity={0.02} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--border))" />
               <XAxis
                 dataKey="t"
                 tick={{ fontSize: 11 }}
-                stroke="hsl(var(--muted-foreground))"
+                stroke="rgb(var(--muted-foreground))"
                 minTickGap={24}
               />
               <YAxis
                 tick={{ fontSize: 11 }}
-                stroke="hsl(var(--muted-foreground))"
+                stroke="rgb(var(--muted-foreground))"
                 width={56}
                 label={{
                   value: unit,
                   angle: -90,
                   position: 'insideLeft',
-                  style: { fontSize: 11, fill: 'hsl(var(--muted-foreground))' },
+                  style: { fontSize: 11, fill: 'rgb(var(--muted-foreground))' },
                 }}
               />
               <Tooltip
                 contentStyle={{
-                  background: 'hsl(var(--popover))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: 8,
+                  background: 'rgb(var(--surface))',
+                  border: '1px solid rgb(var(--border))',
+                  borderRadius: 2,
                   fontSize: 12,
                 }}
                 formatter={(v: number) => [`${v} ${unit}`, label]}
@@ -92,7 +92,7 @@ export function SeriesChart({
                 <Line
                   type="monotone"
                   dataKey="value"
-                  stroke="hsl(190 70% 42%)"
+                  stroke="rgb(var(--chart-1))"
                   strokeWidth={2}
                   dot={false}
                 />
@@ -100,7 +100,7 @@ export function SeriesChart({
                 <Area
                   type="monotone"
                   dataKey="value"
-                  stroke="hsl(190 70% 42%)"
+                  stroke="rgb(var(--chart-1))"
                   strokeWidth={2}
                   fill="url(#seriesFill)"
                 />

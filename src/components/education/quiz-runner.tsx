@@ -115,7 +115,7 @@ export function QuizRunner({
                       className={cn(
                         'flex cursor-pointer items-center gap-3 rounded-lg border p-3 text-sm transition-colors',
                         selected ? 'border-accent bg-accent/5' : 'border-border hover:bg-secondary',
-                        review && isCorrect && 'border-emerald-500 bg-emerald-500/10',
+                        review && isCorrect && 'border-success bg-success/10',
                         isWrongPick && 'border-destructive bg-destructive/10',
                       )}
                     >
@@ -130,7 +130,7 @@ export function QuizRunner({
                       />
                       <span className="flex-1">{o.label}</span>
                       {review && isCorrect ? (
-                        <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                        <CheckCircle2 className="h-4 w-4 text-success" />
                       ) : null}
                       {isWrongPick ? <XCircle className="h-4 w-4 text-destructive" /> : null}
                     </label>

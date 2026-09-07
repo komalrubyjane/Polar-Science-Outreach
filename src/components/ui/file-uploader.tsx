@@ -115,7 +115,7 @@ export function FileUploader({
               key={f.id}
               className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm"
             >
-              <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+              <CheckCircle2 className="h-4 w-4 text-success" />
               <FileIcon className="h-4 w-4 text-muted-foreground" />
               <span className="flex-1 truncate">{f.originalName}</span>
               <span className="text-xs text-muted-foreground">

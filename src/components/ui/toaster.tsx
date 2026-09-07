@@ -27,14 +27,14 @@ export function Toaster() {
             role="status"
             className={cn(
               'pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-lg border bg-card p-4 shadow-lg animate-fade-in',
-              t.variant === 'success' && 'border-emerald-500/40',
+              t.variant === 'success' && 'border-success/40',
               t.variant === 'error' && 'border-destructive/50',
             )}
           >
             <Icon
               className={cn(
                 'mt-0.5 h-5 w-5 shrink-0',
-                t.variant === 'success' && 'text-emerald-500',
+                t.variant === 'success' && 'text-success',
                 t.variant === 'error' && 'text-destructive',
                 (!t.variant || t.variant === 'default') && 'text-accent',
               )}

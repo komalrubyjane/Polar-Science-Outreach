@@ -44,7 +44,7 @@ export default async function DataPage() {
 
       <div className="container-page py-10">
         {!externalConfigured ? (
-          <div className="mb-8 rounded-lg border border-dashed border-amber-500/60 bg-amber-500/10 p-4 text-sm text-amber-800 dark:text-amber-200">
+          <div className="mb-8 rounded-lg border border-dashed border-warning/60 bg-warning/10 p-4 text-sm text-warning dark:text-warning">
             <strong>Demo data mode.</strong> No external scientific data provider is configured
             (see <code>NSIDC_SEA_ICE_API_URL</code> and related variables in{' '}
             <code>.env</code>). All series below are clearly-labelled demo datasets generated for

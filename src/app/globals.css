@@ -3,73 +3,101 @@
 @tailwind utilities;
 
 /* ==========================================================================
-   POLAR SCIENCE PORTAL — editorial design tokens
+   POLAR SCIENCE PORTAL — polar-blue design tokens (single source of truth)
    Channels are "R G B" so Tailwind's /alpha modifiers keep working.
+   Palette: ice / snow / glacier / mist / slate / ocean / deep-ocean /
+   navy / midnight — a soft, cold, premium blue monochrome.
    ========================================================================== */
 
 @layer base {
   :root {
-    /* Light — glacier white, midnight ink */
-    --background: 244 246 248;
-    --surface: 255 255 255;
-    --surface-muted: 236 239 243;
+    /* ---- Light — snow & glacier ---- */
+    --background: 244 248 250;       /* #F4F8FA ice white */
+    --surface: 234 242 246;          /* #EAF2F6 snow      */
+    --surface-muted: 217 232 240;    /* #D9E8F0 pale ice  */
+    --field: 255 255 255;            /* form inputs       */
 
-    --foreground: 9 15 26;
-    --muted-foreground: 90 100 114;
+    --foreground: 23 54 78;          /* #17364E dark text */
+    --muted-foreground: 95 127 157;  /* #5F7F9D           */
 
-    --border: 223 227 233;
-    --input: 214 219 226;
-    --ring: 14 116 140;
+    --border: 213 224 231;           /* rgba(11,42,67,.12) flattened */
+    --input: 185 211 226;            /* #B9D3E2 glacier   */
+    --ring: 118 148 176;             /* #7694B0 slate     */
 
-    --primary: 9 15 26;
-    --primary-foreground: 250 251 252;
+    --primary: 24 59 86;             /* #183B56 deep ocean */
+    --primary-foreground: 255 255 255;
 
-    --secondary: 236 239 243;
-    --secondary-foreground: 20 28 40;
+    --secondary: 234 242 246;        /* #EAF2F6 snow      */
+    --secondary-foreground: 24 59 86;
 
-    --accent: 14 116 140;
+    --accent: 49 90 120;             /* #315A78 ocean — links / actions */
     --accent-foreground: 255 255 255;
 
-    --destructive: 193 42 42;
+    --success: 47 106 79;            /* muted green       */
+    --success-foreground: 255 255 255;
+    --warning: 158 112 52;           /* muted amber       */
+    --warning-foreground: 255 255 255;
+    --destructive: 176 74 74;        /* muted red         */
     --destructive-foreground: 255 255 255;
 
-    --ice: 96 146 178;
-    --glacier: 205 221 234;
-    --aurora: 20 150 110;
+    --ice: 217 232 240;             /* #D9E8F0 */
+    --glacier: 185 211 226;         /* #B9D3E2 */
+    --aurora: 157 184 204;          /* #9DB8CC mist (calm, not neon) */
 
     --radius: 0.25rem;
-
     --header-h: 5.25rem;
+
+    /* Chart palette (scientific blue, distinguishable) */
+    --chart-1: 49 90 120;   /* #315A78 */
+    --chart-2: 118 148 176; /* #7694B0 */
+    --chart-3: 157 184 204; /* #9DB8CC */
+    --chart-4: 24 59 86;    /* #183B56 */
+    --chart-5: 185 211 226; /* #B9D3E2 */
+    --chart-6: 95 127 157;  /* #5F7F9D */
+    --chart-grid: 11 42 67; /* used at low alpha */
   }
 
   .dark {
-    /* Dark — near-black midnight, soft white */
-    --background: 5 7 12;
-    --surface: 12 16 24;
-    --surface-muted: 17 22 32;
+    /* ---- Dark — polar night ---- */
+    --background: 6 29 49;           /* #061D31 midnight  */
+    --surface: 11 42 67;            /* #0B2A43 polar navy */
+    --surface-muted: 24 59 86;      /* #183B56 deep ocean */
+    --field: 11 42 67;
 
-    --foreground: 236 240 245;
-    --muted-foreground: 141 151 167;
+    --foreground: 244 248 250;      /* #F4F8FA ice white  */
+    --muted-foreground: 184 203 216;/* #B8CBD8            */
 
-    --border: 31 38 50;
-    --input: 40 48 62;
-    --ring: 90 205 220;
+    --border: 34 58 80;            /* rgba(255,255,255,.12) flattened */
+    --input: 48 74 100;
+    --ring: 157 184 204;           /* #9DB8CC mist       */
 
-    --primary: 233 238 244;
-    --primary-foreground: 8 11 17;
+    --primary: 234 242 246;        /* light button on navy */
+    --primary-foreground: 11 42 67;
 
-    --secondary: 20 26 37;
-    --secondary-foreground: 220 227 235;
+    --secondary: 24 59 86;
+    --secondary-foreground: 234 242 246;
 
-    --accent: 92 205 221;
-    --accent-foreground: 6 12 16;
+    --accent: 157 184 204;         /* #9DB8CC — links on dark */
+    --accent-foreground: 11 42 67;
 
-    --destructive: 216 88 88;
-    --destructive-foreground: 12 12 12;
+    --success: 92 168 130;
+    --success-foreground: 8 26 18;
+    --warning: 210 168 108;
+    --warning-foreground: 32 22 6;
+    --destructive: 198 108 108;
+    --destructive-foreground: 14 12 12;
 
-    --ice: 125 184 216;
-    --glacier: 200 220 235;
-    --aurora: 92 232 168;
+    --ice: 24 59 86;
+    --glacier: 157 184 204;
+    --aurora: 157 184 204;
+
+    --chart-1: 157 184 204; /* #9DB8CC */
+    --chart-2: 118 148 176; /* #7694B0 */
+    --chart-3: 185 211 226; /* #B9D3E2 */
+    --chart-4: 234 242 246; /* near ice */
+    --chart-5: 95 127 157;  /* #5F7F9D */
+    --chart-6: 217 232 240; /* #D9E8F0 */
+    --chart-grid: 255 255 255;
   }
 }
 
@@ -88,8 +116,8 @@
     text-rendering: optimizeLegibility;
   }
   ::selection {
-    background: rgb(var(--accent) / 0.25);
-    color: rgb(var(--foreground));
+    background: rgb(185 211 226);  /* glacier #B9D3E2 */
+    color: rgb(23 54 78);          /* dark text #17364E */
   }
   :focus-visible {
     outline: 2px solid rgb(var(--ring));
@@ -104,19 +132,24 @@
     line-height: 1.02;
   }
 
-  /* Thin, unobtrusive scrollbar */
   * {
     scrollbar-width: thin;
-    scrollbar-color: rgb(var(--border)) transparent;
+    scrollbar-color: rgb(157 184 204) transparent;   /* mist */
   }
   *::-webkit-scrollbar {
     width: 10px;
     height: 10px;
   }
+  *::-webkit-scrollbar-track {
+    background: rgb(var(--surface));
+  }
   *::-webkit-scrollbar-thumb {
-    background: rgb(var(--border));
+    background: rgb(157 184 204);   /* mist #9DB8CC */
     border-radius: 999px;
     border: 3px solid rgb(var(--background));
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background: rgb(118 148 176);   /* slate #7694B0 */
   }
 }
 
@@ -131,7 +164,6 @@
   .editorial-narrow {
     @apply mx-auto w-full max-w-3xl px-5 sm:px-8;
   }
-  /* keep legacy helper working */
   .container-page {
     @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
   }
@@ -189,7 +221,6 @@
     letter-spacing: 0;
   }
 
-  /* Buttons feel — arrow nudges on hover */
   .hover-arrow svg {
     transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
   }
@@ -197,7 +228,6 @@
     transform: translateX(5px);
   }
 
-  /* Link underline reveal */
   .link-reveal {
     background-image: linear-gradient(currentColor, currentColor);
     background-position: 0 100%;
@@ -222,31 +252,36 @@
       [&_hr]:my-10 [&_hr]:border-border;
   }
 
-  /* Cinematic image treatment */
+  /* Cinematic image treatment — cool polar navy, image stays visible */
   .cinematic-overlay {
     background:
-      linear-gradient(180deg, rgb(0 0 0 / 0.5) 0%, rgb(0 0 0 / 0.15) 35%, rgb(0 0 0 / 0.35) 70%, rgb(0 0 0 / 0.82) 100%),
-      radial-gradient(120% 80% at 50% 0%, transparent 40%, rgb(0 0 0 / 0.35) 100%);
+      linear-gradient(
+        180deg,
+        rgb(11 42 67 / 0.42) 0%,
+        rgb(11 42 67 / 0.14) 34%,
+        rgb(11 42 67 / 0.30) 68%,
+        rgb(6 29 49 / 0.82) 100%
+      ),
+      radial-gradient(120% 80% at 50% 0%, transparent 45%, rgb(6 29 49 / 0.30) 100%);
   }
   .grain::after {
     content: '';
     position: absolute;
     inset: 0;
     pointer-events: none;
-    opacity: 0.55;
-    mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
+    opacity: 0.4;
+    mix-blend-mode: soft-light;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.3'/%3E%3C/svg%3E");
   }
 
   .aurora-bg {
     background:
-      radial-gradient(60% 120% at 12% 8%, rgb(var(--accent) / 0.22), transparent 60%),
-      radial-gradient(46% 90% at 88% 0%, rgb(var(--aurora) / 0.16), transparent 55%),
-      radial-gradient(90% 120% at 50% 100%, rgb(124 100 240 / 0.12), transparent 60%),
+      radial-gradient(60% 120% at 12% 8%, rgb(118 148 176 / 0.28), transparent 60%),
+      radial-gradient(46% 90% at 88% 0%, rgb(157 184 204 / 0.20), transparent 55%),
+      radial-gradient(90% 120% at 50% 100%, rgb(24 59 86 / 0.35), transparent 60%),
       rgb(var(--background));
   }
 
-  /* Scroll reveal (paired with <Reveal>) */
   .will-reveal {
     opacity: 0;
     transform: translateY(22px);
@@ -273,19 +308,24 @@
   font-family: var(--font-sans);
 }
 .dark .leaflet-tile {
-  filter: brightness(0.72) contrast(1.08) saturate(0.85) hue-rotate(175deg) invert(0.92);
+  filter: brightness(0.72) contrast(1.05) saturate(0.82) hue-rotate(178deg) invert(0.92);
 }
 .dark .leaflet-container {
-  background: #0a0e15;
+  background: #061d31;
 }
 .leaflet-popup-content-wrapper,
 .leaflet-popup-tip {
   background: rgb(var(--surface));
   color: rgb(var(--foreground));
   border-radius: 2px;
-  box-shadow: 0 12px 40px -12px rgb(0 0 0 / 0.5);
+  box-shadow: 0 12px 40px -12px rgb(6 29 49 / 0.5);
 }
 .leaflet-bar a {
+  background: #f4f8fa;
+  color: #183b56;
+  border-color: #b9d3e2;
+}
+.dark .leaflet-bar a {
   background: rgb(var(--surface));
   color: rgb(var(--foreground));
   border-color: rgb(var(--border));

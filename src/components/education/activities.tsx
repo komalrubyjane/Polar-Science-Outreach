@@ -14,7 +14,7 @@ export function SeaIceSimulator() {
   const pct = Math.round((extent / 7) * 100);
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6">
+    <div className="border border-border bg-surface p-6">
       <h3 className="font-display text-lg font-semibold">Sea ice simulator</h3>
       <p className="mt-1 text-sm text-muted-foreground">
         Drag to change global warming above pre-industrial levels and see an illustrative
@@ -30,12 +30,12 @@ export function SeaIceSimulator() {
         step={0.1}
         value={warming}
         onChange={(e) => setWarming(Number(e.target.value))}
-        className="mt-2 w-full accent-[hsl(190_70%_42%)]"
+        className="mt-2 w-full accent-polar-ocean"
         aria-label="Global warming in degrees Celsius"
       />
       <div className="mt-4 h-6 w-full overflow-hidden rounded-full bg-muted">
         <div
-          className="h-full rounded-full bg-ice-400 transition-all"
+          className="h-full rounded-full bg-[color:rgb(var(--chart-2))] transition-all"
           style={{ width: `${Math.max(4, pct)}%` }}
         />
       </div>
@@ -55,7 +55,7 @@ export function AlbedoExplainer() {
   const absorbed = 100 - reflected;
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6">
+    <div className="border border-border bg-surface p-6">
       <h3 className="font-display text-lg font-semibold">Albedo: ice vs open ocean</h3>
       <p className="mt-1 text-sm text-muted-foreground">
         Albedo is the fraction of sunlight a surface reflects. Bright sea ice reflects most
@@ -66,7 +66,7 @@ export function AlbedoExplainer() {
           <button
             key={s}
             onClick={() => setSurface(s)}
-            className={`flex-1 rounded-lg border px-3 py-2 text-sm capitalize ${
+            className={`flex-1 rounded-sm border px-3 py-2 text-sm capitalize ${
               surface === s ? 'border-accent bg-accent/10 font-medium' : 'border-border'
             }`}
           >
@@ -102,7 +102,7 @@ export function PolarFoodWeb() {
   const nodes = [...new Set(links.flat())];
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6">
+    <div className="border border-border bg-surface p-6">
       <h3 className="font-display text-lg font-semibold">Antarctic food web</h3>
       <p className="mt-1 text-sm text-muted-foreground">
         Hover a species to highlight what it eats and what eats it. Krill are the keystone —

@@ -87,7 +87,7 @@ export default async function DataSeriesPage({
       <div className="container-page grid gap-10 py-10 lg:grid-cols-[1fr_300px]">
         <div>
           {series.degraded ? (
-            <div className="mb-4 flex items-start gap-2 rounded-lg border border-amber-500/50 bg-amber-500/10 p-3 text-sm text-amber-800 dark:text-amber-200">
+            <div className="mb-4 flex items-start gap-2 rounded-lg border border-warning/50 bg-warning/10 p-3 text-sm text-warning dark:text-warning">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
               <p>
                 {series.degraded.reason} Latest cached dataset from {series.degraded.cachedFrom}.
