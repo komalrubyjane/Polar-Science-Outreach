@@ -2,20 +2,20 @@ import type { Config } from 'tailwindcss';
 
 const withAlpha = (v: string) => `rgb(var(${v}) / <alpha-value>)`;
 
-/** Fixed polar scale — snow · ice · water · deep ocean · polar night. */
+/** Palette sampled from the snow-mountain photograph (see globals.css). */
 const polar = {
-  snow: '#F7FBFD',
-  ice: '#EAF4F8',
-  frost: '#DCEBF2',
-  glacier: '#C0D9E5',
-  mist: '#A1C1D3',
-  water: '#6F9DB8',
-  ocean: '#3D718F',
-  'deep-water': '#24536E',
-  navy: '#123A52',
-  night: '#071F32',
-  text: '#12344A',
-  'text-muted': '#62839A',
+  snow: '#F7F8F9',
+  ice: '#EEF1F3',
+  frost: '#E1E7EB',
+  glacier: '#CFD9DF',
+  mist: '#A4B4C0',
+  water: '#708794',
+  ocean: '#3D5A6B',
+  'deep-water': '#2F4A5A',
+  navy: '#2A343C',
+  night: '#1E272E',
+  text: '#262F36',
+  'text-muted': '#5F6E78',
 };
 
 const config: Config = {
@@ -112,9 +112,9 @@ const config: Config = {
       maxWidth: { editorial: '1600px' },
       transitionTimingFunction: { editorial: 'cubic-bezier(0.22, 1, 0.36, 1)' },
       boxShadow: {
-        glass: '0 20px 60px rgb(7 31 50 / 0.12)',
-        ios: '0 1px 2px rgb(7 31 50 / 0.04), 0 12px 32px -12px rgb(7 31 50 / 0.14)',
-        'ios-hover': '0 2px 4px rgb(7 31 50 / 0.05), 0 28px 60px -18px rgb(7 31 50 / 0.24)',
+        glass: '0 20px 60px rgb(24 31 37 / 0.12)',
+        ios: '0 1px 2px rgb(24 31 37 / 0.04), 0 12px 32px -12px rgb(24 31 37 / 0.14)',
+        'ios-hover': '0 2px 4px rgb(24 31 37 / 0.05), 0 28px 60px -18px rgb(24 31 37 / 0.24)',
       },
       keyframes: {
         'accordion-down': {

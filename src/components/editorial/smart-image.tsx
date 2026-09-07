@@ -28,7 +28,7 @@ export interface SmartImageProps extends BaseProps {
 export function SmartImage({
   candidates,
   alt,
-  fallback = 'linear-gradient(135deg,#061D31 0%,#183B56 100%)',
+  fallback = 'linear-gradient(135deg,#1E272E 0%,#3D4A54 100%)',
   className,
   imgClassName,
   priority,

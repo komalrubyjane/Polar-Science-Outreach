@@ -17,7 +17,7 @@ export default function GlobalError({
           alignItems: 'center',
           justifyContent: 'center',
           margin: 0,
-          background: '#061D31',
+          background: '#1E272E',
           color: 'white',
         }}
       >
@@ -35,7 +35,7 @@ export default function GlobalError({
               borderRadius: 8,
               border: 'none',
               background: 'white',
-              color: '#061D31',
+              color: '#1E272E',
               cursor: 'pointer',
             }}
           >

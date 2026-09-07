@@ -115,9 +115,9 @@ export type CatalogSlot = keyof typeof CATALOG;
 
 /** Cool polar-blue fallback gradients (see design tokens). */
 export const TONE_GRADIENT: Record<CuratedImage['tone'], string> = {
-  ice: 'linear-gradient(135deg,#183B56 0%,#315A78 55%,#5F7F9D 100%)',
-  deep: 'linear-gradient(135deg,#061D31 0%,#0B2A43 55%,#183B56 100%)',
-  aurora: 'linear-gradient(135deg,#0B2A43 0%,#315A78 50%,#7694B0 100%)',
-  storm: 'linear-gradient(135deg,#061D31 0%,#183B56 55%,#315A78 100%)',
-  dawn: 'linear-gradient(135deg,#0B2A43 0%,#315A78 45%,#9DB8CC 100%)',
+  ice: 'linear-gradient(135deg,#2F4A5A 0%,#3D5A6B 55%,#708794 100%)',
+  deep: 'linear-gradient(135deg,#1E272E 0%,#2A343C 55%,#3D4A54 100%)',
+  aurora: 'linear-gradient(135deg,#2A343C 0%,#3D5A6B 50%,#A4B4C0 100%)',
+  storm: 'linear-gradient(135deg,#1E272E 0%,#2F4A5A 55%,#5F6E78 100%)',
+  dawn: 'linear-gradient(135deg,#2A343C 0%,#3D5A6B 45%,#CFD9DF 100%)',
 };

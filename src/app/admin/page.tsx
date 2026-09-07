@@ -110,7 +110,7 @@ export default async function AdminDashboard() {
             <CardTitle className="text-base">User growth (12 months)</CardTitle>
           </CardHeader>
           <CardContent>
-            <GrowthChart data={stats.userGrowth} color="#315A78" />
+            <GrowthChart data={stats.userGrowth} color="#3D5A6B" />
           </CardContent>
         </Card>
         <Card>
@@ -118,7 +118,7 @@ export default async function AdminDashboard() {
             <CardTitle className="text-base">Repository growth (12 months)</CardTitle>
           </CardHeader>
           <CardContent>
-            <GrowthChart data={stats.repoGrowth} color="#7694B0" />
+            <GrowthChart data={stats.repoGrowth} color="#708794" />
           </CardContent>
         </Card>
       </div>

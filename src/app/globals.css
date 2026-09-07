@@ -9,61 +9,65 @@
 
 @layer base {
   :root {
-    /* Fixed polar scale (used by the glass recipe + gradients) */
-    --snow: 247 251 253;        /* #F7FBFD */
-    --ice-c: 234 244 248;       /* #EAF4F8 */
-    --frost: 220 235 242;       /* #D9EAF2 */
-    --glacier-c: 192 217 229;   /* #BCD7E5 */
-    --mist: 161 193 211;        /* #9EBFD2 */
-    --water: 111 157 184;       /* #6F9DB8 */
-    --ocean: 61 113 143;        /* #3D718F */
-    --deep-water: 36 83 110;    /* #23516D */
-    --polar-navy: 18 58 82;     /* #123A52 */
-    --polar-night: 7 31 50;     /* #071F32 */
+    /* ------------------------------------------------------------------
+       Palette sampled from the snow-mountain photograph:
+       bright high-key snow, dusty pale-blue sky, cool grey mountain
+       shadow, near-black fence posts. Very desaturated, very light.
+       ------------------------------------------------------------------ */
+    --snow: 247 248 249;        /* #F7F8F9  brightest snow            */
+    --ice-c: 238 241 243;       /* #EEF1F3  lit snow                  */
+    --frost: 225 231 235;       /* #E1E7EB  soft snow shade           */
+    --glacier-c: 207 217 223;   /* #CFD9DF  cool grey snow            */
+    --mist: 164 180 192;        /* #A4B4C0  mountain haze / sky        */
+    --water: 112 135 148;       /* #708794  mid mountain shadow        */
+    --ocean: 61 90 107;         /* #3D5A6B  deep shadow-meets-sky      */
+    --deep-water: 47 74 90;     /* #2F4A5A  deepest ridge shadow       */
+    --polar-navy: 42 52 60;     /* #2A343C  fence-post grey            */
+    --polar-night: 30 39 46;    /* #1E272E  near-black                 */
 
     /* ---- Light — ice white ---- */
-    --background: 255 255 255;      /* ice white */
-    --surface: 247 251 253;         /* snow — faintly-tinted raised surfaces */
-    --surface-muted: 233 242 248;   /* ice */
+    --background: 255 255 255;      /* pure ice white */
+    --surface: 247 248 249;         /* snow — faintly-cool raised surfaces */
+    --surface-muted: 232 238 242;   /* frost */
     --field: 255 255 255;
 
-    --foreground: 18 52 74;          /* #12344A */
-    --muted-foreground: 98 131 154;  /* #62839A */
+    --foreground: 38 47 54;          /* #262F36  cold ink */
+    --muted-foreground: 95 110 120;  /* #5F6E78  slate — 5.4:1 on white */
 
-    --border: 220 230 236;
-    --input: 188 215 229;
-    --ring: 111 157 184;
+    --border: 221 228 233;
+    --input: 199 210 218;
+    --ring: 112 135 148;
 
-    --primary: 18 58 82;             /* polar navy */
+    --primary: 47 74 90;            /* #2F4A5A  primary action fill */
     --primary-foreground: 255 255 255;
 
-    --secondary: 234 244 248;        /* ice */
-    --secondary-foreground: 18 52 74;
+    --secondary: 238 241 243;       /* ice */
+    --secondary-foreground: 38 47 54;
 
-    --accent: 61 113 143;            /* ocean — links / actions */
+    --accent: 61 90 107;           /* #3D5A6B  links / actions — 6.6:1 on white */
     --accent-foreground: 255 255 255;
 
-    --success: 47 106 79;
+    --success: 74 122 107;
     --success-foreground: 255 255 255;
-    --warning: 158 112 52;
+    --warning: 154 122 78;
     --warning-foreground: 255 255 255;
-    --destructive: 176 74 74;
+    --destructive: 168 90 90;
     --destructive-foreground: 255 255 255;
 
-    --ice: 217 234 242;
-    --glacier: 188 215 229;
-    --aurora: 158 191 210;
+    --ice: 225 231 235;
+    --glacier: 207 217 223;
+    --aurora: 164 180 192;
 
     --radius: 0.875rem;
     --header-h: 5.25rem;
 
-    --chart-1: 61 113 143;   /* ocean */
-    --chart-2: 111 157 184;  /* water */
-    --chart-3: 158 191 210;  /* mist */
-    --chart-4: 35 81 109;    /* deep water */
-    --chart-5: 188 215 229;  /* glacier */
-    --chart-6: 98 131 154;   /* muted */
-    --chart-grid: 18 52 74;
+    --chart-1: 61 90 107;     /* deep shadow */
+    --chart-2: 112 135 148;   /* mid shadow  */
+    --chart-3: 164 180 192;   /* haze        */
+    --chart-4: 47 74 90;      /* ridge       */
+    --chart-5: 207 217 223;   /* snow grey   */
+    --chart-6: 95 110 120;    /* slate       */
+    --chart-grid: 38 47 54;
 
     /* Glass surfaces */
     --glass-bg: 255 255 255;
@@ -73,48 +77,48 @@
   }
 
   .dark {
-    /* ---- Dark — polar night ---- */
-    --background: 7 31 50;
-    --surface: 18 58 82;
-    --surface-muted: 35 81 109;
-    --field: 18 58 82;
+    /* ---- Dark — the photograph's shadow tones, deepened ---- */
+    --background: 24 31 37;         /* #181F25 */
+    --surface: 32 41 48;           /* #202930 */
+    --surface-muted: 43 54 62;     /* #2B363E */
+    --field: 32 41 48;
 
-    --foreground: 234 244 248;
-    --muted-foreground: 158 191 210;
+    --foreground: 238 241 243;     /* lit snow */
+    --muted-foreground: 164 180 192; /* haze */
 
-    --border: 30 62 86;
-    --input: 45 78 104;
-    --ring: 158 191 210;
+    --border: 47 59 69;
+    --input: 60 74 86;
+    --ring: 164 180 192;
 
-    --primary: 234 244 248;
-    --primary-foreground: 7 31 50;
+    --primary: 238 241 243;
+    --primary-foreground: 24 31 37;
 
-    --secondary: 35 81 109;
-    --secondary-foreground: 234 244 248;
+    --secondary: 43 54 62;
+    --secondary-foreground: 238 241 243;
 
-    --accent: 158 191 210;
-    --accent-foreground: 7 31 50;
+    --accent: 182 198 210;        /* #B6C6D2  pale sky — ~9:1 on the dark ground */
+    --accent-foreground: 24 31 37;
 
-    --success: 92 168 130;
-    --success-foreground: 8 26 18;
-    --warning: 210 168 108;
-    --warning-foreground: 32 22 6;
-    --destructive: 198 108 108;
-    --destructive-foreground: 14 12 12;
+    --success: 122 178 158;
+    --success-foreground: 10 24 20;
+    --warning: 208 176 128;
+    --warning-foreground: 30 22 8;
+    --destructive: 206 128 128;
+    --destructive-foreground: 16 12 12;
 
-    --ice: 35 81 109;
-    --glacier: 158 191 210;
-    --aurora: 158 191 210;
+    --ice: 43 54 62;
+    --glacier: 164 180 192;
+    --aurora: 164 180 192;
 
-    --chart-1: 158 191 210;
-    --chart-2: 111 157 184;
-    --chart-3: 188 215 229;
-    --chart-4: 234 244 248;
-    --chart-5: 98 131 154;
-    --chart-6: 217 234 242;
+    --chart-1: 164 180 192;
+    --chart-2: 112 135 148;
+    --chart-3: 207 217 223;
+    --chart-4: 238 241 243;
+    --chart-5: 95 110 120;
+    --chart-6: 225 231 235;
     --chart-grid: 255 255 255;
 
-    --glass-bg: 7 31 50;
+    --glass-bg: 24 31 37;
     --glass-bg-alpha: 0.55;
     --glass-border: 255 255 255;
   }
@@ -135,8 +139,8 @@
     text-rendering: optimizeLegibility;
   }
   ::selection {
-    background: rgb(188 215 229);
-    color: rgb(18 52 74);
+    background: rgb(207 217 223);
+    color: rgb(38 47 54);
   }
   :focus-visible {
     outline: 2px solid rgb(var(--ring));
@@ -153,16 +157,16 @@
 
   * {
     scrollbar-width: thin;
-    scrollbar-color: rgb(158 191 210) transparent;
+    scrollbar-color: rgb(164 180 192) transparent;
   }
   *::-webkit-scrollbar { width: 10px; height: 10px; }
   *::-webkit-scrollbar-track { background: rgb(var(--surface-muted)); }
   *::-webkit-scrollbar-thumb {
-    background: rgb(158 191 210);
+    background: rgb(164 180 192);
     border-radius: 999px;
     border: 3px solid rgb(var(--background));
   }
-  *::-webkit-scrollbar-thumb:hover { background: rgb(111 157 184); }
+  *::-webkit-scrollbar-thumb:hover { background: rgb(112 135 148); }
 }
 
 /* ==========================================================================
@@ -222,21 +226,21 @@
     -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
     backdrop-filter: blur(var(--glass-blur)) saturate(140%);
     border: 1px solid rgb(var(--glass-border) / 0.28);
-    box-shadow: 0 20px 60px rgb(7 31 50 / 0.12);
+    box-shadow: 0 20px 60px rgb(24 31 37 / 0.12);
   }
   .glass-dark {
-    background: rgb(7 31 50 / 0.55);
+    background: rgb(24 31 37 / 0.55);
     -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
     backdrop-filter: blur(var(--glass-blur)) saturate(140%);
     border: 1px solid rgb(255 255 255 / 0.14);
-    box-shadow: 0 20px 60px rgb(7 31 50 / 0.28);
+    box-shadow: 0 20px 60px rgb(24 31 37 / 0.28);
   }
   .glass-hairline { border: 1px solid rgb(var(--glass-border) / 0.2); }
 
   /* ---- iPhone-style card ---- */
   .card-ios {
     @apply rounded-[1.25rem] border border-border bg-surface;
-    box-shadow: 0 1px 2px rgb(7 31 50 / 0.04), 0 12px 32px -12px rgb(7 31 50 / 0.14);
+    box-shadow: 0 1px 2px rgb(24 31 37 / 0.04), 0 12px 32px -12px rgb(24 31 37 / 0.14);
     transition:
       transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
       box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
@@ -245,7 +249,7 @@
   .card-ios:hover {
     transform: translateY(-5px);
     border-color: rgb(var(--water) / 0.5);
-    box-shadow: 0 2px 4px rgb(7 31 50 / 0.05), 0 28px 60px -18px rgb(7 31 50 / 0.24);
+    box-shadow: 0 2px 4px rgb(24 31 37 / 0.05), 0 28px 60px -18px rgb(24 31 37 / 0.24);
   }
 
   .hover-arrow svg { transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
@@ -276,12 +280,12 @@
     background:
       linear-gradient(
         180deg,
-        rgb(7 31 50 / 0.34) 0%,
-        rgb(7 31 50 / 0.10) 34%,
-        rgb(18 58 82 / 0.28) 66%,
-        rgb(7 31 50 / 0.80) 100%
+        rgb(24 31 37 / 0.34) 0%,
+        rgb(24 31 37 / 0.10) 34%,
+        rgb(43 54 62 / 0.28) 66%,
+        rgb(24 31 37 / 0.80) 100%
       ),
-      radial-gradient(120% 80% at 50% 0%, transparent 45%, rgb(7 31 50 / 0.26) 100%);
+      radial-gradient(120% 80% at 50% 0%, transparent 45%, rgb(24 31 37 / 0.26) 100%);
   }
   .grain::after {
     content: '';
@@ -292,16 +296,16 @@
 
   .aurora-bg {
     background:
-      radial-gradient(60% 120% at 12% 8%, rgb(111 157 184 / 0.30), transparent 60%),
-      radial-gradient(46% 90% at 88% 0%, rgb(158 191 210 / 0.22), transparent 55%),
-      radial-gradient(90% 120% at 50% 100%, rgb(18 58 82 / 0.38), transparent 62%),
+      radial-gradient(60% 120% at 12% 8%, rgb(112 135 148 / 0.26), transparent 60%),
+      radial-gradient(46% 90% at 88% 0%, rgb(164 180 192 / 0.20), transparent 55%),
+      radial-gradient(90% 120% at 50% 100%, rgb(43 54 62 / 0.38), transparent 62%),
       rgb(var(--background));
   }
   /* very subtle "light across water" sheen */
   .water-sheen {
     background:
       radial-gradient(60% 40% at 20% 30%, rgb(255 255 255 / 0.06), transparent 60%),
-      radial-gradient(50% 40% at 80% 70%, rgb(158 191 210 / 0.10), transparent 60%);
+      radial-gradient(50% 40% at 80% 70%, rgb(164 180 192 / 0.10), transparent 60%);
     background-size: 200% 200%;
     animation: sheen 22s ease-in-out infinite;
   }
@@ -371,22 +375,22 @@
 .dark .leaflet-tile {
   filter: brightness(0.72) contrast(1.05) saturate(0.82) hue-rotate(178deg) invert(0.92);
 }
-.dark .leaflet-container { background: #071f32; }
+.dark .leaflet-container { background: #181f25; }
 .leaflet-popup-content-wrapper, .leaflet-popup-tip {
   background: rgb(var(--surface));
   color: rgb(var(--foreground));
   border-radius: 12px;
-  box-shadow: 0 20px 60px -12px rgb(7 31 50 / 0.4);
+  box-shadow: 0 20px 60px -12px rgb(24 31 37 / 0.4);
 }
 .leaflet-bar a {
   background: rgb(255 255 255 / 0.75);
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
-  color: #12344a;
+  color: #262f36;
   border-color: rgb(255 255 255 / 0.4) !important;
 }
 .dark .leaflet-bar a {
-  background: rgb(7 31 50 / 0.6);
+  background: rgb(24 31 37 / 0.6);
   color: rgb(var(--foreground));
   border-color: rgb(255 255 255 / 0.14) !important;
 }
@@ -394,7 +398,7 @@
 @media (max-width: 640px) {
   .glass, .glass-dark {
     --glass-blur: 12px;
-    box-shadow: 0 12px 32px rgb(7 31 50 / 0.14);
+    box-shadow: 0 12px 32px rgb(24 31 37 / 0.14);
   }
 }
 

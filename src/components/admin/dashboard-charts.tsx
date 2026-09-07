@@ -15,8 +15,8 @@ import {
 
 /** Controlled scientific blue palette (see design tokens --chart-*). */
 const PALETTE = [
-  '#315A78', '#7694B0', '#9DB8CC', '#183B56', '#B9D3E2',
-  '#5F7F9D', '#0B2A43', '#D9E8F0', '#28506B', '#8CA9C0', '#3E6C8C',
+  '#3D5A6B', '#708794', '#A4B4C0', '#2F4A5A', '#CFD9DF',
+  '#5F6E78', '#2A343C', '#E1E7EB', '#4A6373', '#8FA0AC', '#607884',
 ];
 
 const AXIS = 'rgb(var(--muted-foreground))';
@@ -31,7 +31,7 @@ const tooltipStyle = {
 
 export function GrowthChart({
   data,
-  color = '#315A78',
+  color = '#3D5A6B',
 }: {
   data: { month: string; count: number }[];
   color?: string;
