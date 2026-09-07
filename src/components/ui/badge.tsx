@@ -3,20 +3,18 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const badgeVariants = cva(
-  'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors',
+  'inline-flex items-center gap-1.5 rounded-sm px-2 py-0.5 text-[0.68rem] font-medium uppercase tracking-[0.12em] transition-colors',
   {
     variants: {
       variant: {
-        default: 'border-transparent bg-primary/10 text-primary dark:bg-primary/20',
-        accent: 'border-transparent bg-accent/10 text-accent dark:bg-accent/20',
-        secondary: 'border-transparent bg-secondary text-secondary-foreground',
-        outline: 'border-border text-foreground',
-        success:
-          'border-transparent bg-emerald-500/12 text-emerald-700 dark:text-emerald-300',
-        warning:
-          'border-transparent bg-amber-500/15 text-amber-700 dark:text-amber-300',
-        danger: 'border-transparent bg-destructive/12 text-destructive',
-        demo: 'border-dashed border-amber-500/60 bg-amber-500/10 text-amber-700 dark:text-amber-300',
+        default: 'bg-secondary text-secondary-foreground',
+        accent: 'bg-accent/12 text-accent',
+        secondary: 'bg-secondary text-muted-foreground',
+        outline: 'border border-border text-muted-foreground',
+        success: 'bg-emerald-500/12 text-emerald-600 dark:text-emerald-300',
+        warning: 'bg-amber-500/14 text-amber-600 dark:text-amber-300',
+        danger: 'bg-destructive/12 text-destructive',
+        demo: 'border border-dashed border-amber-500/50 bg-amber-500/[0.08] text-amber-600 dark:text-amber-300',
       },
     },
     defaultVariants: { variant: 'default' },

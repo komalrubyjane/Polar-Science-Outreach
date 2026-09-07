@@ -4,7 +4,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0',
+  'group/btn inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-sm text-sm font-medium transition-all duration-300 ease-editorial focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:transition-transform [&_svg]:duration-300 hover:[&_svg:last-child]:translate-x-1',
   {
     variants: {
       variant: {
@@ -12,15 +12,15 @@ const buttonVariants = cva(
         accent: 'bg-accent text-accent-foreground hover:bg-accent/90',
         destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
         outline:
-          'border border-input bg-background hover:bg-secondary hover:text-secondary-foreground',
-        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+          'border border-border bg-transparent hover:border-foreground/40 hover:bg-secondary/60',
+        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/70',
         ghost: 'hover:bg-secondary hover:text-secondary-foreground',
-        link: 'text-accent underline-offset-4 hover:underline',
+        link: 'text-accent underline-offset-4 hover:underline [&_svg:last-child]:hover:translate-x-1',
       },
       size: {
-        default: 'h-10 px-4 py-2',
-        sm: 'h-9 rounded-md px-3',
-        lg: 'h-11 rounded-md px-8 text-base',
+        default: 'h-11 px-5 py-2',
+        sm: 'h-9 px-3.5 text-[0.8rem]',
+        lg: 'h-12 px-7 text-[0.95rem] tracking-[0.02em]',
         icon: 'h-10 w-10',
       },
     },

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter, Sora } from 'next/font/google';
+import { Inter, Space_Grotesk, Instrument_Serif } from 'next/font/google';
 import './globals.css';
 import { SITE } from '@/lib/constants';
 import { env } from '@/lib/env';
@@ -11,8 +11,24 @@ import { CookieConsent } from '@/components/cookie-consent';
 import { AnalyticsTracker } from '@/components/analytics-tracker';
 import { Suspense } from 'react';
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-sans', display: 'swap' });
-const sora = Sora({ subsets: ['latin'], variable: '--font-display', display: 'swap' });
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+});
+const display = Space_Grotesk({
+  subsets: ['latin'],
+  variable: '--font-display',
+  display: 'swap',
+  weight: ['400', '500', '600', '700'],
+});
+const serif = Instrument_Serif({
+  subsets: ['latin'],
+  variable: '--font-serif',
+  display: 'swap',
+  weight: '400',
+  style: ['normal', 'italic'],
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
@@ -50,24 +66,29 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#0b1f3a' },
-    { media: '(prefers-color-scheme: dark)', color: '#0a1a2a' },
+    { media: '(prefers-color-scheme: light)', color: '#f4f6f8' },
+    { media: '(prefers-color-scheme: dark)', color: '#05070c' },
   ],
   width: 'device-width',
   initialScale: 1,
+  colorScheme: 'dark light',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${sora.variable}`}>
-      <body className="min-h-dvh font-sans">
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${inter.variable} ${display.variable} ${serif.variable}`}
+    >
+      <body className="min-h-dvh bg-background font-sans text-foreground antialiased">
         <Providers>
           <a href="#main-content" className="skip-link">
             Skip to main content
           </a>
           <div className="flex min-h-dvh flex-col">
             <SiteHeader />
-            <main id="main-content" className="flex-1">
+            <main id="main-content" className="flex-1 pt-[var(--header-h)]">
               {children}
             </main>
             <SiteFooter />

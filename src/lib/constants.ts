@@ -27,6 +27,26 @@ export const PRIMARY_NAV: NavItem[] = [
   { label: 'About', href: '/about', description: 'Mission, partners and policies' },
 ];
 
+/** Minimal editorial primary navigation. */
+export const EDITORIAL_NAV: NavItem[] = [
+  { label: 'Explore', href: '/explore' },
+  { label: 'Research', href: '/repository' },
+  { label: 'Data', href: '/data' },
+  { label: 'Media', href: '/media' },
+  { label: 'Learn', href: '/education' },
+  { label: 'Expeditions', href: '/expeditions' },
+];
+
+export const EDITORIAL_NAV_MORE: NavItem[] = [
+  { label: 'Polar Map', href: '/map' },
+  { label: 'Events', href: '/events' },
+  { label: 'News', href: '/news' },
+  { label: 'Glossary', href: '/glossary' },
+  { label: 'Researchers', href: '/researchers' },
+  { label: 'Institutions', href: '/institutions' },
+  { label: 'About', href: '/about' },
+];
+
 export const FOOTER_NAV: { heading: string; items: NavItem[] }[] = [
   {
     heading: 'Explore',

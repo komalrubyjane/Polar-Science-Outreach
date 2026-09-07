@@ -27,7 +27,13 @@ const GROUP_LABELS: Record<GlobalSearchGroup, string> = {
   glossary: 'Glossary',
 };
 
-export function GlobalSearch() {
+export function GlobalSearch({
+  variant = 'bar',
+  className,
+}: {
+  variant?: 'bar' | 'icon';
+  className?: string;
+} = {}) {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
   const [q, setQ] = React.useState('');
@@ -94,18 +100,30 @@ export function GlobalSearch() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-2 text-muted-foreground sm:w-64 sm:justify-start"
-          aria-label="Open site search"
-        >
-          <Search className="h-4 w-4" />
-          <span className="hidden sm:inline">Search the portal…</span>
-          <kbd className="ml-auto hidden rounded border border-border bg-muted px-1.5 text-[10px] font-medium sm:inline">
-            ⌘K
-          </kbd>
-        </Button>
+        {variant === 'icon' ? (
+          <button
+            aria-label="Open site search"
+            className={
+              className ??
+              'inline-flex h-9 w-9 items-center justify-center rounded-full text-current transition-colors hover:bg-current/10'
+            }
+          >
+            <Search className="h-[1.15rem] w-[1.15rem]" />
+          </button>
+        ) : (
+          <Button
+            variant="outline"
+            size="sm"
+            className={className ?? 'gap-2 text-muted-foreground sm:w-64 sm:justify-start'}
+            aria-label="Open site search"
+          >
+            <Search className="h-4 w-4" />
+            <span className="hidden sm:inline">Search the portal…</span>
+            <kbd className="ml-auto hidden rounded border border-border bg-muted px-1.5 text-[10px] font-medium sm:inline">
+              ⌘K
+            </kbd>
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="top-24 max-w-2xl translate-y-0 p-0">
         <DialogHeader className="border-b border-border p-4">

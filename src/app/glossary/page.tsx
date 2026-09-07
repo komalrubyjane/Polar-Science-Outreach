@@ -27,6 +27,7 @@ export default async function GlossaryPage() {
   return (
     <>
       <PageHero
+        imageSlot="glossary"
         eyebrow="Reference"
         title="Polar science glossary"
         description="Definitions written to be understandable without a science background. Many terms link to a related topic in the explorer."

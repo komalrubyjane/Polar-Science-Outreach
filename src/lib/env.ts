@@ -60,6 +60,11 @@ const schema = z.object({
   NSIDC_SEA_ICE_API_URL: z.string().optional().default(''),
   CLIMATE_DATA_API_URL: z.string().optional().default(''),
   OCEAN_DATA_API_URL: z.string().optional().default(''),
+
+  // Optional editorial-imagery search (server-side only). Curated imagery works
+  // without this; it only powers image browsing for editors.
+  UNSPLASH_ACCESS_KEY: z.string().optional().default(''),
+  PEXELS_API_KEY: z.string().optional().default(''),
 });
 
 const parsed = schema.safeParse(process.env);

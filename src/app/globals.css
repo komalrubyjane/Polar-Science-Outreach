@@ -2,115 +2,293 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ==========================================================================
+   POLAR SCIENCE PORTAL — editorial design tokens
+   Channels are "R G B" so Tailwind's /alpha modifiers keep working.
+   ========================================================================== */
+
 @layer base {
   :root {
-    --background: 210 40% 99%;
-    --foreground: 214 60% 12%;
+    /* Light — glacier white, midnight ink */
+    --background: 244 246 248;
+    --surface: 255 255 255;
+    --surface-muted: 236 239 243;
 
-    --card: 0 0% 100%;
-    --card-foreground: 214 60% 12%;
+    --foreground: 9 15 26;
+    --muted-foreground: 90 100 114;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 214 60% 12%;
+    --border: 223 227 233;
+    --input: 214 219 226;
+    --ring: 14 116 140;
 
-    --primary: 209 63% 30%;
-    --primary-foreground: 200 100% 98%;
+    --primary: 9 15 26;
+    --primary-foreground: 250 251 252;
 
-    --secondary: 202 45% 94%;
-    --secondary-foreground: 209 63% 24%;
+    --secondary: 236 239 243;
+    --secondary-foreground: 20 28 40;
 
-    --muted: 210 30% 95%;
-    --muted-foreground: 214 15% 42%;
+    --accent: 14 116 140;
+    --accent-foreground: 255 255 255;
 
-    --accent: 190 70% 42%;
-    --accent-foreground: 200 100% 98%;
+    --destructive: 193 42 42;
+    --destructive-foreground: 255 255 255;
 
-    --destructive: 0 72% 46%;
-    --destructive-foreground: 0 0% 100%;
+    --ice: 96 146 178;
+    --glacier: 205 221 234;
+    --aurora: 20 150 110;
 
-    --border: 210 24% 88%;
-    --input: 210 24% 86%;
-    --ring: 190 70% 42%;
+    --radius: 0.25rem;
 
-    --radius: 0.625rem;
+    --header-h: 5.25rem;
   }
 
   .dark {
-    --background: 214 46% 8%;
-    --foreground: 200 30% 92%;
+    /* Dark — near-black midnight, soft white */
+    --background: 5 7 12;
+    --surface: 12 16 24;
+    --surface-muted: 17 22 32;
 
-    --card: 214 42% 11%;
-    --card-foreground: 200 30% 92%;
+    --foreground: 236 240 245;
+    --muted-foreground: 141 151 167;
 
-    --popover: 214 42% 11%;
-    --popover-foreground: 200 30% 92%;
+    --border: 31 38 50;
+    --input: 40 48 62;
+    --ring: 90 205 220;
 
-    --primary: 195 70% 55%;
-    --primary-foreground: 214 60% 10%;
+    --primary: 233 238 244;
+    --primary-foreground: 8 11 17;
 
-    --secondary: 213 32% 18%;
-    --secondary-foreground: 200 30% 92%;
+    --secondary: 20 26 37;
+    --secondary-foreground: 220 227 235;
 
-    --muted: 213 30% 16%;
-    --muted-foreground: 210 16% 64%;
+    --accent: 92 205 221;
+    --accent-foreground: 6 12 16;
 
-    --accent: 187 65% 48%;
-    --accent-foreground: 214 60% 10%;
+    --destructive: 216 88 88;
+    --destructive-foreground: 12 12 12;
 
-    --destructive: 0 62% 52%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 213 28% 22%;
-    --input: 213 28% 24%;
-    --ring: 187 65% 48%;
+    --ice: 125 184 216;
+    --glacier: 200 220 235;
+    --aurora: 92 232 168;
   }
 }
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: rgb(var(--border));
   }
   html {
     scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
   }
   body {
-    @apply bg-background text-foreground antialiased;
-    font-feature-settings: 'rlig' 1, 'calt' 1;
+    background-color: rgb(var(--background));
+    color: rgb(var(--foreground));
+    font-feature-settings: 'ss01' 1, 'cv05' 1, 'calt' 1;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: rgb(var(--accent) / 0.25);
+    color: rgb(var(--foreground));
   }
   :focus-visible {
-    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+    outline: 2px solid rgb(var(--ring));
+    outline-offset: 2px;
+    border-radius: 1px;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.02;
+  }
+
+  /* Thin, unobtrusive scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--border)) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: rgb(var(--border));
+    border-radius: 999px;
+    border: 3px solid rgb(var(--background));
   }
 }
 
+/* ==========================================================================
+   Editorial primitives
+   ========================================================================== */
+
 @layer components {
+  .editorial {
+    @apply mx-auto w-full max-w-[1600px] px-5 sm:px-8 lg:px-14 xl:px-20;
+  }
+  .editorial-narrow {
+    @apply mx-auto w-full max-w-3xl px-5 sm:px-8;
+  }
+  /* keep legacy helper working */
   .container-page {
     @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
   }
-  .prose-polar {
-    @apply max-w-none leading-relaxed text-foreground/90 [&_a]:text-accent [&_a:hover]:underline [&_h2]:mt-8 [&_h2]:text-xl [&_h2]:font-semibold [&_h3]:mt-6 [&_h3]:text-lg [&_h3]:font-semibold [&_p]:my-4 [&_ul]:my-4 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:my-4 [&_ol]:list-decimal [&_ol]:pl-6;
+
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-[0.7rem] font-medium uppercase tracking-[0.22em] text-muted-foreground;
   }
+  .eyebrow-accent {
+    @apply text-accent;
+  }
+
+  .hairline {
+    @apply h-px w-full bg-border;
+  }
+
+  .metadata {
+    @apply text-[0.7rem] font-medium uppercase tracking-[0.16em] text-muted-foreground;
+  }
+
+  .display-hero {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    line-height: 0.92;
+    font-size: clamp(3.25rem, 12vw, 11rem);
+  }
+  .display-1 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 0.98;
+    font-size: clamp(2.75rem, 7vw, 6rem);
+  }
+  .display-2 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.025em;
+    line-height: 1.02;
+    font-size: clamp(2rem, 4.4vw, 3.75rem);
+  }
+  .display-3 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    font-size: clamp(1.35rem, 2.1vw, 2rem);
+  }
+  .editorial-lead {
+    @apply text-lg leading-relaxed text-muted-foreground sm:text-xl;
+    max-width: 46ch;
+  }
+  .font-serif-editorial {
+    font-family: var(--font-serif), Georgia, serif;
+    font-style: italic;
+    letter-spacing: 0;
+  }
+
+  /* Buttons feel — arrow nudges on hover */
+  .hover-arrow svg {
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .hover-arrow:hover svg {
+    transform: translateX(5px);
+  }
+
+  /* Link underline reveal */
+  .link-reveal {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    background-size: 0% 1px;
+    transition: background-size 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    padding-bottom: 1px;
+  }
+  .link-reveal:hover,
+  .link-reveal:focus-visible {
+    background-size: 100% 1px;
+  }
+
+  .prose-polar {
+    @apply max-w-none text-[1.02rem] leading-[1.75] text-foreground/90
+      [&_a]:text-accent [&_a]:underline [&_a]:decoration-accent/30 [&_a]:underline-offset-4 hover:[&_a]:decoration-accent
+      [&_h2]:mt-12 [&_h2]:font-display [&_h2]:text-2xl [&_h2]:font-medium [&_h2]:tracking-tight
+      [&_h3]:mt-8 [&_h3]:font-display [&_h3]:text-xl [&_h3]:font-medium
+      [&_p]:my-5 [&_ul]:my-5 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:my-5 [&_ol]:list-decimal [&_ol]:pl-5
+      [&_blockquote]:my-6 [&_blockquote]:border-l-2 [&_blockquote]:border-accent [&_blockquote]:pl-5 [&_blockquote]:font-serif-editorial [&_blockquote]:text-lg
+      [&_code]:rounded-sm [&_code]:bg-secondary [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-[0.85em]
+      [&_hr]:my-10 [&_hr]:border-border;
+  }
+
+  /* Cinematic image treatment */
+  .cinematic-overlay {
+    background:
+      linear-gradient(180deg, rgb(0 0 0 / 0.5) 0%, rgb(0 0 0 / 0.15) 35%, rgb(0 0 0 / 0.35) 70%, rgb(0 0 0 / 0.82) 100%),
+      radial-gradient(120% 80% at 50% 0%, transparent 40%, rgb(0 0 0 / 0.35) 100%);
+  }
+  .grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.55;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
+  }
+
   .aurora-bg {
     background:
-      radial-gradient(60% 120% at 15% 10%, hsl(190 80% 45% / 0.28), transparent 60%),
-      radial-gradient(50% 100% at 85% 0%, hsl(160 70% 50% / 0.22), transparent 55%),
-      radial-gradient(80% 120% at 50% 100%, hsl(250 60% 60% / 0.18), transparent 60%),
-      hsl(var(--primary));
-    background-size: 180% 180%;
+      radial-gradient(60% 120% at 12% 8%, rgb(var(--accent) / 0.22), transparent 60%),
+      radial-gradient(46% 90% at 88% 0%, rgb(var(--aurora) / 0.16), transparent 55%),
+      radial-gradient(90% 120% at 50% 100%, rgb(124 100 240 / 0.12), transparent 60%),
+      rgb(var(--background));
+  }
+
+  /* Scroll reveal (paired with <Reveal>) */
+  .will-reveal {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  .is-revealed {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
   }
 }
 
 /* Skip link */
 .skip-link {
-  @apply sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground;
+  @apply sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-sm focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground;
 }
 
-/* Leaflet container needs an explicit height and a dark-mode-friendly base */
+/* Leaflet */
 .leaflet-container {
-  @apply h-full w-full rounded-lg;
-  background: hsl(var(--muted));
+  height: 100%;
+  width: 100%;
+  background: rgb(var(--surface-muted));
+  font-family: var(--font-sans);
 }
 .dark .leaflet-tile {
-  filter: brightness(0.85) contrast(1.05);
+  filter: brightness(0.72) contrast(1.08) saturate(0.85) hue-rotate(175deg) invert(0.92);
+}
+.dark .leaflet-container {
+  background: #0a0e15;
+}
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: rgb(var(--surface));
+  color: rgb(var(--foreground));
+  border-radius: 2px;
+  box-shadow: 0 12px 40px -12px rgb(0 0 0 / 0.5);
+}
+.leaflet-bar a {
+  background: rgb(var(--surface));
+  color: rgb(var(--foreground));
+  border-color: rgb(var(--border));
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -121,5 +299,9 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
+  }
+  .will-reveal {
+    opacity: 1 !important;
+    transform: none !important;
   }
 }

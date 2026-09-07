@@ -48,6 +48,7 @@ export default async function EducationPage({
   return (
     <>
       <PageHero
+        imageSlot="education"
         eyebrow="Education & Outreach"
         title="Learn about the polar regions"
         description="Plain-language explainers, classroom-ready lesson plans, hands-on interactive activities and quizzes. No account needed."

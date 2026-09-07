@@ -35,6 +35,7 @@ export default async function DataPage() {
   return (
     <>
       <PageHero
+        imageSlot="data"
         eyebrow="Polar Data"
         title="Polar environmental data"
         description="Interactive time-series for key polar indicators. The portal is a dissemination platform: every series shows its source, unit, methodology and last-updated date."

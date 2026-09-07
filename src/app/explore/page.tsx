@@ -38,6 +38,7 @@ export default async function ExplorePage() {
   return (
     <>
       <PageHero
+        imageSlot="region-antarctic"
         eyebrow="Explore Polar Science"
         title="Polar science, by theme"
         description="Seven thematic areas, each gathering overviews, key concepts, research, data, media and educational resources. Start with a theme, then follow the links into the repository and media library."

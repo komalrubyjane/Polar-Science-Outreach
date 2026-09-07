@@ -1,229 +1,320 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import {
-  ArrowRight,
-  Snowflake,
-  Thermometer,
-  Building2,
-  Compass,
-  FileText,
-} from 'lucide-react';
-import { Hero } from '@/components/home/hero';
+import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { SectionHeading, EmptyState } from '@/components/ui/misc';
+import { EmptyState } from '@/components/ui/misc';
 import {
-  ResearchCard,
+  Eyebrow,
+  Hairline,
+  SectionHeading,
+  EditorialLink,
+  MetaRow,
+} from '@/components/editorial/primitives';
+import { CinematicHero } from '@/components/editorial/cinematic-hero';
+import { ScrollCue } from '@/components/editorial/scroll-cue';
+import { Reveal } from '@/components/editorial/reveal';
+import { SmartImage } from '@/components/editorial/smart-image';
+import { Sparkline } from '@/components/editorial/sparkline';
+import {
   MediaCard,
-  EventCard,
-  ArticleCard,
   EducationCard,
+  ArticleCard,
 } from '@/components/content/cards';
 import { NewsletterForm } from '@/components/newsletter-form';
 import {
   getFeaturedResearch,
   getLatestDiscoveries,
   getFeaturedMedia,
-  getUpcomingEvents,
   getLatestNews,
   getEducationHighlights,
-  getPolarSnapshot,
+  getActiveExpeditions,
 } from '@/lib/queries';
-import { formatDateTime, formatNumber } from '@/lib/utils';
-import { DISCIPLINE_LABELS } from '@/lib/constants';
+import { DEMO_SERIES } from '@/lib/data-providers/demo';
+import { getEditorialImage } from '@/lib/images/provider';
+import { formatDate } from '@/lib/utils';
+import { DISCIPLINE_LABELS, POLE_LABELS, REPOSITORY_TYPE_LABELS } from '@/lib/constants';
 
 export const metadata: Metadata = {
   description:
-    'Explore research, data, discoveries, expeditions, educational resources and stories from the Arctic and Antarctic.',
+    'Explore the science, people, places and changing environments of the Arctic and Antarctic.',
 };
 
 export const revalidate = 300;
 
+function seriesStat(id: keyof typeof DEMO_SERIES) {
+  const s = DEMO_SERIES[id]();
+  const values = s.points.map((p) => p.value);
+  const first = values[0]!;
+  const last = values[values.length - 1]!;
+  const pct = first !== 0 ? ((last - first) / Math.abs(first)) * 100 : 0;
+  return { series: s, values, last, pct };
+}
+
 export default async function HomePage() {
-  const [featured, discoveries, media, events, news, education, snapshot] = await Promise.all([
-    getFeaturedResearch(3),
-    getLatestDiscoveries(6),
-    getFeaturedMedia(8),
-    getUpcomingEvents(4),
-    getLatestNews(3),
+  const [featured, discoveries, media, news, education, expeditions] = await Promise.all([
+    getFeaturedResearch(1),
+    getLatestDiscoveries(3),
+    getFeaturedMedia(5),
+    getLatestNews(4),
     getEducationHighlights(3),
-    getPolarSnapshot(),
+    getActiveExpeditions(1),
   ]);
+
+  const hero = getEditorialImage('hero-primary', 2400);
+  const arctic = getEditorialImage('region-arctic', 1600);
+  const antarctic = getEditorialImage('region-antarctic', 1600);
+
+  const seaIce = seriesStat('arctic-sea-ice-extent');
+  const lead = featured[0];
+  const expedition = expeditions[0];
 
   return (
     <>
-      <Hero />
-
-      {/* A. Polar Regions */}
-      <section className="container-page py-16">
-        <SectionHeading
-          eyebrow="Two poles, one system"
-          title="The Polar Regions"
-          description="The Arctic and Antarctic differ profoundly — an ocean ringed by land versus a continent ringed by ocean — yet both regulate the planet's climate and are changing fast."
-        />
-        <div className="grid gap-6 md:grid-cols-2">
-          <RegionCard
-            pole="Arctic"
-            href="/explore?pole=ARCTIC"
-            blurb="A sea-ice-covered ocean surrounded by the landmasses of North America, Europe and Asia. Home to four million people, including many Indigenous nations."
-            stats={[
-              ['Area of Arctic Ocean', '~14 million km²'],
-              ['Sea ice minimum (Sep)', 'Long-term decline'],
-              ['Countries with territory', '8'],
-            ]}
-          />
-          <RegionCard
-            pole="Antarctic"
-            href="/explore?pole=ANTARCTIC"
-            blurb="A continent larger than Europe, buried under ice up to 4.8 km thick, governed by the Antarctic Treaty and dedicated to peace and science."
-            stats={[
-              ['Ice sheet area', '~14 million km²'],
-              ['Share of Earth’s fresh water', '~60%'],
-              ['Permanent residents', '0'],
-            ]}
-          />
-        </div>
-      </section>
-
-      {/* B. Live Polar Snapshot */}
-      <section className="border-y border-border bg-card">
-        <div className="container-page py-14">
-          <SectionHeading
-            eyebrow="Live Polar Snapshot"
-            title="Key polar indicators"
-            description="Environmental values below are drawn from clearly-labelled demo datasets for interface demonstration. Platform counts are live from this deployment's database."
-          />
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <MetricCard
-              icon={Snowflake}
-              label="Arctic sea ice extent"
-              value={snapshot.seaIceArcticExtent != null ? `${snapshot.seaIceArcticExtent} M km²` : '—'}
-              note="Demo dataset"
-              demo
-            />
-            <MetricCard
-              icon={Snowflake}
-              label="Antarctic sea ice extent"
-              value={
-                snapshot.seaIceAntarcticExtent != null
-                  ? `${snapshot.seaIceAntarcticExtent} M km²`
-                  : '—'
-              }
-              note="Demo dataset"
-              demo
-            />
-            <MetricCard
-              icon={Thermometer}
-              label="Arctic temp. anomaly"
-              value={
-                snapshot.arcticTempAnomaly != null
-                  ? `${snapshot.arcticTempAnomaly > 0 ? '+' : ''}${snapshot.arcticTempAnomaly} °C`
-                  : '—'
-              }
-              note="Demo dataset vs 1981–2010"
-              demo
-            />
-            <MetricCard
-              icon={Building2}
-              label="Research stations catalogued"
-              value={formatNumber(snapshot.researchStations)}
-              note="Live from database"
-            />
-            <MetricCard
-              icon={Compass}
-              label="Active expeditions"
-              value={formatNumber(snapshot.activeExpeditions)}
-              note="Live from database"
-            />
-            <MetricCard
-              icon={FileText}
-              label="Publications (last 90 days)"
-              value={formatNumber(snapshot.recentPublications)}
-              note="Live from database"
-            />
-          </div>
-          <p className="mt-4 text-xs text-muted-foreground">
-            Snapshot generated {formatDateTime(snapshot.generatedAt)}. Source for physical
-            indicators: generated demo series (see{' '}
-            <Link href="/data" className="text-accent hover:underline">
-              Polar Data
-            </Link>
-            ). The portal is a dissemination platform and not the original data producer.
+      {/* ─────────────────────────── HERO ─────────────────────────── */}
+      <CinematicHero candidates={hero.candidates} fallback={hero.fallback} alt={hero.alt}>
+        <div className="max-w-5xl">
+          <Eyebrow className="text-white/70">Polar Science Portal</Eyebrow>
+          <h1 className="display-hero mt-6 text-white">
+            Earth&apos;s
+            <br />
+            frozen
+            <br />
+            <span className="text-white/70">frontier</span>
+          </h1>
+          <p className="mt-8 max-w-xl text-lg leading-relaxed text-white/80 sm:text-xl">
+            Explore the science, people, places and changing environments of the Arctic and
+            Antarctic.
           </p>
-        </div>
-      </section>
-
-      {/* C. Featured Research */}
-      <section className="container-page py-16">
-        <SectionHeading
-          eyebrow="Featured Research"
-          title="Highlighted from the repository"
-          action={
-            <Button asChild variant="outline">
-              <Link href="/repository">
-                All research <ArrowRight className="h-4 w-4" />
+          <div className="mt-10 flex flex-wrap items-center gap-4">
+            <Button asChild size="lg" className="hover-arrow bg-white text-navy hover:bg-white/90">
+              <Link href="/explore">
+                Explore Polar Science <ArrowRight />
               </Link>
             </Button>
-          }
-        />
-        {featured.length ? (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {featured.map((r) => (
-              <ResearchCard key={r.id} data={r} />
-            ))}
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
+              className="border-white/35 text-white hover:border-white hover:bg-white/10 hover:text-white"
+            >
+              <Link href="/data">View Data</Link>
+            </Button>
           </div>
+        </div>
+
+        <div className="mt-16 flex items-end justify-between gap-6">
+          <ScrollCue />
+          <div className="text-right text-white/70">
+            <p className="font-display text-2xl font-medium text-white">78° N</p>
+            <p className="metadata text-white/60">Arctic Ocean</p>
+          </div>
+        </div>
+      </CinematicHero>
+
+      {/* ─────────────────────── 01 INTRODUCTION ─────────────────────── */}
+      <section className="editorial py-24 sm:py-36">
+        <Reveal>
+          <Hairline />
+          <div className="mt-8 grid gap-10 md:grid-cols-12">
+            <div className="md:col-span-7">
+              <Eyebrow accent>
+                <span className="tabular-nums">01</span>
+                <span className="opacity-40">/</span> The Polar World
+              </Eyebrow>
+              <p className="display-1 mt-6 text-balance">
+                Two frozen regions.
+                <br />
+                <span className="text-muted-foreground">One rapidly changing planet.</span>
+              </p>
+            </div>
+            <div className="md:col-span-5 md:pt-4">
+              <p className="text-lg leading-relaxed text-muted-foreground">
+                The Arctic — an ocean ringed by land — and the Antarctic — a continent ringed by
+                ocean — together regulate global climate, sea level and ocean circulation. Both
+                are warming faster than the planet as a whole.
+              </p>
+              <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+                This portal gathers research, data, imagery and field journals from across the
+                polar science community and makes them discoverable, citable and understandable.
+              </p>
+              <div className="mt-8">
+                <EditorialLink href="/about">About the portal</EditorialLink>
+              </div>
+            </div>
+          </div>
+        </Reveal>
+      </section>
+
+      {/* ─────────────────────── POLAR REGIONS ─────────────────────── */}
+      <section className="border-y border-border">
+        <div className="grid md:grid-cols-2">
+          <RegionPanel
+            name="Arctic"
+            coord="66° 33′ N"
+            blurb="A sea-ice-covered ocean surrounded by North America, Europe and Asia. Home to four million people, including many Indigenous nations."
+            href="/explore?pole=ARCTIC"
+            image={arctic}
+          />
+          <RegionPanel
+            name="Antarctic"
+            coord="66° 33′ S"
+            blurb="A continent larger than Europe, buried under ice up to 4.8 km thick, governed by the Antarctic Treaty and dedicated to peace and science."
+            href="/explore?pole=ANTARCTIC"
+            image={antarctic}
+            className="border-t border-border md:border-l md:border-t-0"
+          />
+        </div>
+      </section>
+
+      {/* ─────────────────────── 02 FEATURED RESEARCH ─────────────────────── */}
+      <section className="editorial py-24 sm:py-36">
+        <SectionHeading
+          index="02"
+          kicker="Latest Research"
+          title="From the knowledge repository"
+          action={<EditorialLink href="/repository">All research</EditorialLink>}
+        />
+
+        {lead ? (
+          <Reveal>
+            <Link
+              href={`/repository/${lead.slug}`}
+              className="group grid gap-8 lg:grid-cols-2 lg:gap-14"
+            >
+              <div className="relative aspect-[16/11] w-full overflow-hidden border border-border">
+                <SmartImage
+                  candidates={getEditorialImage('research', 1400).candidates}
+                  fallback={getEditorialImage('research', 1400).fallback}
+                  alt=""
+                  sizes="(max-width:1024px) 100vw, 50vw"
+                  className="h-full w-full"
+                  imgClassName="transition-transform [transition-duration:1100ms] ease-editorial group-hover:scale-[1.04]"
+                />
+              </div>
+              <div className="flex flex-col justify-center">
+                <MetaRow
+                  items={[
+                    REPOSITORY_TYPE_LABELS[lead.type] ?? lead.type,
+                    DISCIPLINE_LABELS[lead.discipline],
+                    POLE_LABELS[lead.pole],
+                    formatDate(lead.publicationDate, { year: 'numeric' }),
+                  ]}
+                />
+                <h3 className="display-3 mt-5 text-balance transition-colors group-hover:text-accent">
+                  {lead.title}
+                </h3>
+                <p className="mt-4 max-w-xl text-muted-foreground">{lead.abstract.slice(0, 260)}…</p>
+                <p className="mt-6 metadata">
+                  {lead.authors?.map((a) => a.researcher.fullName).slice(0, 3).join(', ') ||
+                    lead.institution?.name}
+                </p>
+                <span className="hover-arrow mt-8 inline-flex items-center gap-2 text-sm font-medium uppercase tracking-[0.14em] text-accent">
+                  Read research <ArrowRight className="h-4 w-4" />
+                </span>
+              </div>
+            </Link>
+          </Reveal>
         ) : (
           <EmptyState
-            title="No published research yet"
-            description="Once the database is seeded (npm run db:seed) or content is published, featured research appears here."
+            title="No research yet"
+            description="Seed the database (npm run db:seed) to populate the repository."
           />
         )}
-      </section>
 
-      {/* D. Latest Discoveries */}
-      <section className="border-y border-border bg-card">
-        <div className="container-page py-16">
-          <SectionHeading eyebrow="Latest Discoveries" title="Recent additions by discipline" />
-          <div className="mb-6 flex flex-wrap gap-2">
-            {Object.entries(DISCIPLINE_LABELS).map(([key, label]) => (
+        {discoveries.length ? (
+          <div className="mt-20 grid gap-px border border-border bg-border sm:grid-cols-3">
+            {discoveries.map((r) => (
               <Link
-                key={key}
-                href={`/repository?discipline=${key}`}
-                className="rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-muted-foreground hover:border-accent hover:text-accent"
+                key={r.id}
+                href={`/repository/${r.slug}`}
+                className="group flex flex-col bg-surface p-6 transition-colors hover:bg-surface-muted/50"
               >
-                {label}
+                <MetaRow items={[DISCIPLINE_LABELS[r.discipline], POLE_LABELS[r.pole]]} />
+                <h4 className="mt-3 flex-1 font-display text-base font-medium leading-snug tracking-tight transition-colors group-hover:text-accent">
+                  {r.title}
+                </h4>
+                <p className="mt-4 metadata">{formatDate(r.publicationDate, { dateStyle: 'medium' })}</p>
               </Link>
             ))}
           </div>
-          {discoveries.length ? (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {discoveries.map((r) => (
-                <ResearchCard key={r.id} data={r} />
-              ))}
+        ) : null}
+      </section>
+
+      {/* ─────────────────────── 03 DATA ─────────────────────── */}
+      <section className="border-y border-border bg-surface">
+        <div className="editorial py-24 sm:py-36">
+          <SectionHeading
+            index="03"
+            kicker="Polar Data"
+            title="The ice is moving."
+            lead="Interactive time-series for the polar environment. Every series carries its source, unit and methodology."
+            action={<EditorialLink href="/data">Full data</EditorialLink>}
+          />
+
+          <Reveal className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+            <div>
+              <p className="metadata">Arctic sea ice extent — latest demo value</p>
+              <p className="mt-4 font-display text-6xl font-medium tracking-tight sm:text-7xl">
+                {seaIce.last}
+                <span className="ml-2 align-top text-2xl text-muted-foreground">M km²</span>
+              </p>
+              <p className="mt-3 text-sm">
+                <span
+                  className={
+                    seaIce.pct < 0 ? 'text-accent' : 'text-amber-500'
+                  }
+                >
+                  {seaIce.pct > 0 ? '+' : ''}
+                  {seaIce.pct.toFixed(1)}%
+                </span>{' '}
+                <span className="text-muted-foreground">across the demo record</span>
+              </p>
+              <div className="mt-8 inline-flex border border-dashed border-amber-500/50 bg-amber-500/[0.06] px-3 py-2 text-xs font-medium text-amber-600 dark:text-amber-300">
+                Demo dataset — illustrative values, not a live measurement.
+              </div>
+              <div className="mt-8 flex gap-3">
+                <Button asChild variant="outline" size="sm">
+                  <a href={`/api/data/series/${seaIce.series.id}?format=csv`}>CSV</a>
+                </Button>
+                <Button asChild variant="outline" size="sm">
+                  <a href={`/api/data/series/${seaIce.series.id}?format=json-file`}>JSON</a>
+                </Button>
+              </div>
             </div>
-          ) : (
-            <EmptyState title="Nothing published yet" />
-          )}
+            <div className="flex flex-col justify-end">
+              <div className="h-56 w-full text-accent">
+                <Sparkline points={seaIce.values} />
+              </div>
+              <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1">
+                {['Sea Ice', 'Climate', 'Ocean', 'Cryosphere'].map((t) => (
+                  <Link
+                    key={t}
+                    href="/data"
+                    className="metadata text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    {t}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </Reveal>
         </div>
       </section>
 
-      {/* E. Featured Media */}
-      <section className="container-page py-16">
+      {/* ─────────────────────── 04 MEDIA ─────────────────────── */}
+      <section className="editorial py-24 sm:py-36">
         <SectionHeading
-          eyebrow="Featured Media"
-          title="Photos, video, audio & infographics"
-          action={
-            <Button asChild variant="outline">
-              <Link href="/media">
-                Media library <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
-          }
+          index="04"
+          kicker="Polar Media"
+          title="A visual archive"
+          action={<EditorialLink href="/media">Media library</EditorialLink>}
         />
         {media.length ? (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {media.map((m) => (
+          <div className="grid gap-4 md:grid-cols-3 md:grid-rows-2">
+            <div className="md:col-span-2 md:row-span-2">
+              <MediaCard data={media[0]!} />
+            </div>
+            {media.slice(1, 5).map((m) => (
               <MediaCard key={m.id} data={m} />
             ))}
           </div>
@@ -232,181 +323,169 @@ export default async function HomePage() {
         )}
       </section>
 
-      {/* F. Upcoming Events */}
-      <section className="border-y border-border bg-card">
-        <div className="container-page py-16">
+      {/* ─────────────────────── 05 EDUCATION ─────────────────────── */}
+      <section className="border-y border-border bg-surface">
+        <div className="editorial py-24 sm:py-36">
           <SectionHeading
-            eyebrow="Upcoming Events"
-            title="Conferences, webinars & public lectures"
-            action={
-              <Button asChild variant="outline">
-                <Link href="/events">
-                  All events <ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
-            }
+            index="05"
+            kicker="Education & Outreach"
+            title="Understand the poles"
+            lead="Plain-language explainers, classroom lesson plans, interactive models and quizzes — no account required."
+            action={<EditorialLink href="/education">Explore learning</EditorialLink>}
           />
-          {events.length ? (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-              {events.map((e) => (
-                <EventCard key={e.id} data={e} />
+          <div className="mb-10 flex flex-wrap gap-x-6 gap-y-2">
+            {[
+              ['Explainers', '/education?type=EXPLAINER'],
+              ['Lesson plans', '/education?type=LESSON_PLAN'],
+              ['Activities', '/education/activities'],
+              ['Quizzes', '/education/quizzes'],
+            ].map(([label, href]) => (
+              <Link
+                key={href}
+                href={href}
+                className="metadata text-muted-foreground transition-colors hover:text-foreground"
+              >
+                {label}
+              </Link>
+            ))}
+          </div>
+          {education.length ? (
+            <div className="grid gap-6 md:grid-cols-3">
+              {education.map((e) => (
+                <EducationCard key={e.id} data={e} />
               ))}
             </div>
           ) : (
-            <EmptyState title="No upcoming events scheduled" />
+            <EmptyState title="No education resources yet" />
           )}
         </div>
       </section>
 
-      {/* G. Education */}
-      <section className="container-page py-16">
-        <SectionHeading
-          eyebrow="Education & Outreach"
-          title="For students, teachers and the curious"
-          action={
-            <Button asChild variant="outline">
-              <Link href="/education">
-                Explore resources <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
-          }
-        />
-        <div className="mb-6 grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {[
-            ['Student resources', '/education?type=STUDENT_RESOURCE'],
-            ['Teacher resources', '/education?type=TEACHER_RESOURCE'],
-            ['Lesson plans', '/education?type=LESSON_PLAN'],
-            ['Interactive activities', '/education/activities'],
-            ['Quizzes', '/education/quizzes'],
-            ['Explainers', '/education?type=EXPLAINER'],
-          ].map(([label, href]) => (
-            <Link
-              key={href}
-              href={href}
-              className="rounded-lg border border-border bg-card p-4 text-sm font-medium hover:border-accent hover:text-accent"
-            >
-              {label}
-            </Link>
-          ))}
-        </div>
-        {education.length ? (
-          <div className="grid gap-6 md:grid-cols-3">
-            {education.map((e) => (
-              <EducationCard key={e.id} data={e} />
-            ))}
-          </div>
-        ) : (
-          <EmptyState title="No education resources published yet" />
-        )}
-      </section>
-
-      {/* News */}
-      <section className="border-t border-border bg-card">
-        <div className="container-page py-16">
+      {/* ─────────────────────── 06 EXPEDITIONS ─────────────────────── */}
+      {expedition ? (
+        <section className="editorial py-24 sm:py-36">
           <SectionHeading
-            eyebrow="News"
-            title="From the polar science community"
-            action={
-              <Button asChild variant="outline">
-                <Link href="/news">
-                  Newsroom <ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
-            }
+            index="06"
+            kicker="In The Field"
+            title="Expedition journals"
+            action={<EditorialLink href="/expeditions">All expeditions</EditorialLink>}
+          />
+          <Reveal>
+            <Link
+              href={`/expeditions/${expedition.slug}`}
+              className="group relative block aspect-[21/9] w-full overflow-hidden border border-border"
+            >
+              <SmartImage
+                candidates={getEditorialImage('expeditions', 2000).candidates}
+                fallback={getEditorialImage('expeditions', 2000).fallback}
+                alt=""
+                sizes="100vw"
+                className="h-full w-full"
+                imgClassName="transition-transform [transition-duration:1200ms] ease-editorial group-hover:scale-[1.03]"
+              />
+              <div className="cinematic-overlay absolute inset-0" />
+              <div className="absolute inset-0 flex flex-col justify-end p-8 text-white sm:p-14">
+                <MetaRow
+                  items={[
+                    expedition.region?.name ?? 'Polar region',
+                    formatDate(expedition.startDate, { year: 'numeric' }),
+                    expedition.vessel ?? undefined,
+                  ]}
+                  className="text-white/70"
+                />
+                <h3 className="display-2 mt-4 max-w-3xl text-white">{expedition.name}</h3>
+                {expedition.summary ? (
+                  <p className="mt-4 max-w-xl text-white/80">{expedition.summary}</p>
+                ) : null}
+                <span className="hover-arrow mt-8 inline-flex items-center gap-2 text-sm font-medium uppercase tracking-[0.14em]">
+                  Follow the journal <ArrowUpRight className="h-4 w-4" />
+                </span>
+              </div>
+            </Link>
+          </Reveal>
+        </section>
+      ) : null}
+
+      {/* ─────────────────────── 07 NEWS ─────────────────────── */}
+      <section className="border-t border-border bg-surface">
+        <div className="editorial py-24 sm:py-36">
+          <SectionHeading
+            index="07"
+            kicker="News"
+            title="From the community"
+            action={<EditorialLink href="/news">Newsroom</EditorialLink>}
           />
           {news.length ? (
-            <div className="grid gap-6 md:grid-cols-3">
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
               {news.map((n) => (
                 <ArticleCard key={n.id} data={n} />
               ))}
             </div>
           ) : (
-            <EmptyState title="No news articles published yet" />
+            <EmptyState title="No news articles yet" />
           )}
         </div>
       </section>
 
-      {/* H. Newsletter */}
-      <section className="container-page py-20">
-        <div className="mx-auto max-w-2xl rounded-2xl border border-border bg-card p-8 text-center shadow-sm">
-          <Badge variant="accent" className="mb-3">
-            Newsletter
-          </Badge>
-          <h2 className="font-display text-2xl font-semibold">Polar science in your inbox</h2>
-          <p className="mx-auto mt-2 max-w-md text-muted-foreground">
-            A monthly digest of new research, data releases, expeditions and events. Double
-            opt-in; unsubscribe anytime.
-          </p>
-          <div className="mx-auto mt-6 max-w-md">
-            <NewsletterForm source="homepage" />
+      {/* ─────────────────────── NEWSLETTER ─────────────────────── */}
+      <section className="editorial py-24 sm:py-32">
+        <div className="grid gap-10 border border-border p-8 sm:p-14 lg:grid-cols-[1fr_0.8fr] lg:items-center">
+          <div>
+            <Eyebrow accent>The Newsletter</Eyebrow>
+            <p className="display-3 mt-4 text-balance">
+              Polar science in your inbox, once a month.
+            </p>
+            <p className="mt-4 max-w-md text-muted-foreground">
+              New research, data releases, expeditions and events. Double opt-in; unsubscribe
+              anytime.
+            </p>
           </div>
+          <NewsletterForm source="homepage" />
         </div>
       </section>
     </>
   );
 }
 
-function RegionCard({
-  pole,
+function RegionPanel({
+  name,
+  coord,
   blurb,
-  stats,
   href,
+  image,
+  className,
 }: {
-  pole: string;
+  name: string;
+  coord: string;
   blurb: string;
-  stats: [string, string][];
   href: string;
+  image: { candidates: string[]; fallback: string; alt: string };
+  className?: string;
 }) {
   return (
-    <Card className="overflow-hidden">
-      <div className={`h-2 w-full ${pole === 'Arctic' ? 'bg-ice-500' : 'bg-aurora-cyan'}`} />
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-xl">
-          <Snowflake className="h-5 w-5 text-accent" /> {pole}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm text-muted-foreground">{blurb}</p>
-        <dl className="mt-4 divide-y divide-border rounded-lg border border-border">
-          {stats.map(([k, v]) => (
-            <div key={k} className="flex items-center justify-between px-3 py-2 text-sm">
-              <dt className="text-muted-foreground">{k}</dt>
-              <dd className="font-medium">{v}</dd>
-            </div>
-          ))}
-        </dl>
-        <Button asChild variant="outline" className="mt-5 w-full">
-          <Link href={href}>
-            Explore the {pole} <ArrowRight className="h-4 w-4" />
-          </Link>
-        </Button>
-      </CardContent>
-    </Card>
-  );
-}
-
-function MetricCard({
-  icon: Icon,
-  label,
-  value,
-  note,
-  demo,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  value: string;
-  note: string;
-  demo?: boolean;
-}) {
-  return (
-    <div className="rounded-xl border border-border bg-background p-5">
-      <div className="flex items-center justify-between">
-        <Icon className="h-5 w-5 text-accent" />
-        {demo ? <Badge variant="demo">Demo</Badge> : <Badge variant="success">Live</Badge>}
+    <Link
+      href={href}
+      className={`group relative flex min-h-[70svh] flex-col justify-end overflow-hidden p-8 text-white sm:p-14 ${className ?? ''}`}
+    >
+      <div className="absolute inset-0 -z-10">
+        <SmartImage
+          candidates={image.candidates}
+          fallback={image.fallback}
+          alt=""
+          sizes="(max-width:768px) 100vw, 50vw"
+          className="h-full w-full"
+          imgClassName="transition-transform [transition-duration:1400ms] ease-editorial group-hover:scale-[1.06]"
+        />
       </div>
-      <p className="mt-3 font-display text-2xl font-semibold">{value}</p>
-      <p className="mt-1 text-sm text-muted-foreground">{label}</p>
-      <p className="mt-1 text-xs text-muted-foreground/80">{note}</p>
-    </div>
+      <div className="cinematic-overlay absolute inset-0 -z-10 transition-opacity duration-500 group-hover:opacity-90" />
+      <p className="metadata text-white/70">{coord}</p>
+      <h3 className="display-1 mt-3 text-white">{name}</h3>
+      <p className="mt-4 max-w-md translate-y-2 text-white/80 opacity-0 transition-all duration-500 ease-editorial group-hover:translate-y-0 group-hover:opacity-100">
+        {blurb}
+      </p>
+      <span className="hover-arrow mt-8 inline-flex items-center gap-2 text-sm font-medium uppercase tracking-[0.14em]">
+        Explore the {name} <ArrowRight className="h-4 w-4" />
+      </span>
+    </Link>
   );
 }

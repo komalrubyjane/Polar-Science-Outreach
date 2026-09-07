@@ -67,6 +67,7 @@ export default async function EventsPage({
   return (
     <>
       <PageHero
+        imageSlot="events"
         eyebrow="Events"
         title="Polar science events"
         description="Conferences, webinars, workshops, school programmes, exhibitions and public lectures from across the polar community."

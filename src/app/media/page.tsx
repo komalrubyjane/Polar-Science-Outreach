@@ -49,6 +49,7 @@ export default async function MediaPage({
   return (
     <>
       <PageHero
+        imageSlot="media"
         eyebrow="Media Library"
         title="Polar media"
         description="Photographs, video, audio, infographics and interactive stories. Every asset carries its creator, copyright, licence and attribution — reuse only within those terms."

@@ -3,8 +3,8 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Snowflake, ChevronDown } from 'lucide-react';
-import { PRIMARY_NAV, SITE } from '@/lib/constants';
+import { Plus, Bookmark } from 'lucide-react';
+import { EDITORIAL_NAV, EDITORIAL_NAV_MORE } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import { GlobalSearch } from '@/components/search/global-search';
 import { ThemeToggle } from '@/components/theme-toggle';
@@ -15,69 +15,119 @@ import { MobileNav } from '@/components/navigation/mobile-nav';
 export function SiteHeader() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = React.useState(false);
+  const [overHero, setOverHero] = React.useState(false);
 
   React.useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
+    const onScroll = () => setScrolled(window.scrollY > 24);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // Transparent while a page's cinematic hero sentinel is still on screen.
+  React.useEffect(() => {
+    setOverHero(false);
+    const el = document.getElementById('site-hero-sentinel');
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const obs = new IntersectionObserver(
+      ([entry]) => setOverHero(Boolean(entry?.isIntersecting)),
+      { rootMargin: '-4px 0px 0px 0px' },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [pathname]);
+
+  const transparent = overHero && !scrolled;
+
   return (
     <header
+      data-transparent={transparent}
       className={cn(
-        'sticky top-0 z-40 w-full border-b border-border/80 bg-background/85 backdrop-blur transition-shadow',
-        scrolled && 'shadow-sm',
+        'fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,height,color] duration-500 ease-editorial',
+        transparent
+          ? 'border-b border-transparent bg-transparent text-white'
+          : 'border-b border-border bg-background/80 text-foreground backdrop-blur-xl supports-[backdrop-filter]:bg-background/70',
       )}
+      style={{ ['--_h' as string]: scrolled ? '4.25rem' : '5.25rem' }}
     >
-      <div className="container-page flex h-16 items-center gap-3">
-        <MobileNav />
-
-        <Link href="/" className="flex items-center gap-2">
-          <Snowflake className="h-6 w-6 text-accent" />
-          <span className="font-display text-base font-semibold tracking-tight">
-            {SITE.name}
+      <div
+        className="editorial flex items-center justify-between gap-6"
+        style={{ height: 'var(--_h)' }}
+      >
+        {/* Wordmark */}
+        <Link href="/" className="group flex shrink-0 items-center gap-3" aria-label="Polar Science Portal — home">
+          <span className="grid h-8 w-8 place-items-center border border-current/40">
+            <span className="block h-1.5 w-1.5 rounded-full bg-current transition-transform duration-500 group-hover:scale-150" />
+          </span>
+          <span className="hidden font-display text-[0.95rem] font-medium uppercase leading-[1.05] tracking-[0.18em] sm:block">
+            Polar
+            <br />
+            Science
           </span>
         </Link>
 
-        <nav className="ml-4 hidden items-center gap-0.5 lg:flex" aria-label="Primary">
-          {PRIMARY_NAV.slice(0, 6).map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                'rounded-md px-2.5 py-2 text-sm font-medium text-foreground/80 transition-colors hover:bg-secondary hover:text-foreground',
-                pathname.startsWith(item.href) && 'text-accent',
-              )}
-            >
-              {item.label}
-            </Link>
-          ))}
+        {/* Primary nav */}
+        <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary">
+          {EDITORIAL_NAV.map((item) => {
+            const active =
+              item.href === '/'
+                ? pathname === '/'
+                : pathname === item.href || pathname.startsWith(`${item.href}/`);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  'relative px-3 py-2 text-xs font-medium uppercase tracking-[0.16em] transition-opacity',
+                  active ? 'opacity-100' : 'opacity-60 hover:opacity-100',
+                )}
+              >
+                {item.label}
+                <span
+                  className={cn(
+                    'absolute inset-x-3 bottom-1 h-px origin-left bg-current transition-transform duration-500 ease-editorial',
+                    active ? 'scale-x-100' : 'scale-x-0',
+                  )}
+                />
+              </Link>
+            );
+          })}
           <div className="group relative">
-            <button className="flex items-center gap-1 rounded-md px-2.5 py-2 text-sm font-medium text-foreground/80 hover:bg-secondary hover:text-foreground">
-              More <ChevronDown className="h-3.5 w-3.5" />
+            <button className="flex items-center gap-1 px-3 py-2 text-xs font-medium uppercase tracking-[0.16em] opacity-60 transition-opacity hover:opacity-100">
+              More <Plus className="h-3 w-3" />
             </button>
-            <div className="invisible absolute left-0 top-full w-64 rounded-lg border border-border bg-popover p-2 opacity-0 shadow-lg transition-all group-hover:visible group-hover:opacity-100">
-              {[...PRIMARY_NAV.slice(6), { label: 'Polar Map', href: '/map' }, { label: 'Glossary', href: '/glossary' }, { label: 'Researchers', href: '/researchers' }, { label: 'Institutions', href: '/institutions' }].map(
-                (item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="block rounded-md px-3 py-2 text-sm hover:bg-secondary"
-                  >
-                    {item.label}
-                  </Link>
-                ),
-              )}
+            <div className="invisible absolute right-0 top-full w-56 border border-border bg-popover p-1.5 text-foreground opacity-0 shadow-2xl transition-all duration-300 group-hover:visible group-hover:opacity-100">
+              {EDITORIAL_NAV_MORE.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="block px-3 py-2 text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                >
+                  {item.label}
+                </Link>
+              ))}
             </div>
           </div>
         </nav>
 
-        <div className="ml-auto flex items-center gap-1.5">
-          <GlobalSearch />
-          <LanguageSelector />
+        {/* Actions */}
+        <div className="flex shrink-0 items-center gap-0.5">
+          <GlobalSearch variant="icon" />
+          <Link
+            href="/bookmarks"
+            aria-label="Bookmarks"
+            className="hidden h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-current/10 sm:inline-flex"
+          >
+            <Bookmark className="h-[1.1rem] w-[1.1rem]" />
+          </Link>
+          <span className="hidden sm:inline-flex">
+            <LanguageSelector />
+          </span>
           <ThemeToggle />
-          <UserMenu />
+          <span className="hidden sm:inline-flex">
+            <UserMenu />
+          </span>
+          <MobileNav />
         </div>
       </div>
     </header>

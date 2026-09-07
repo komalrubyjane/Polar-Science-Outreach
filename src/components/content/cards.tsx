@@ -1,7 +1,10 @@
 import Link from 'next/link';
-import { CalendarDays, MapPin, FileText, Image as ImageIcon, Database, Compass, GraduationCap, Newspaper } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { MetaRow } from '@/components/editorial/primitives';
+import { SmartImage } from '@/components/editorial/smart-image';
+import { getEditorialImage, pickSlot, imageFallback } from '@/lib/images/provider';
+import type { CatalogSlot } from '@/lib/images/catalog';
 import { formatDate, truncate } from '@/lib/utils';
 import {
   DISCIPLINE_LABELS,
@@ -12,6 +15,56 @@ import {
   EDUCATION_TYPE_LABELS,
   REPOSITORY_TYPE_LABELS,
 } from '@/lib/constants';
+
+/* ------------------------------------------------------------------ shared */
+
+function CardShell({
+  href,
+  slot,
+  seed,
+  imageSrc,
+  alt,
+  aspect = 'aspect-[4/3]',
+  badges,
+  children,
+}: {
+  href: string;
+  slot?: CatalogSlot;
+  seed: string;
+  imageSrc?: string | null;
+  alt: string;
+  aspect?: string;
+  badges?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  const editorial = slot ? getEditorialImage(slot, 900) : null;
+  const candidates = imageSrc
+    ? [imageSrc, ...(editorial?.candidates ?? [])]
+    : (editorial?.candidates ?? []);
+  return (
+    <Link
+      href={href}
+      className="group flex h-full flex-col border border-border bg-surface transition-colors duration-300 ease-editorial hover:border-foreground/30"
+    >
+      <div className={`relative ${aspect} w-full overflow-hidden`}>
+        <SmartImage
+          candidates={candidates}
+          fallback={editorial?.fallback ?? imageFallback(seed)}
+          alt={alt}
+          sizes="(max-width:768px) 100vw, 33vw"
+          className="h-full w-full"
+          imgClassName="transition-transform [transition-duration:900ms] ease-editorial group-hover:scale-[1.04]"
+        />
+        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/45 to-transparent" aria-hidden />
+        {badges ? <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">{badges}</div> : null}
+        <ArrowUpRight className="absolute right-3 top-3 h-4 w-4 -translate-y-1 text-white opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100" />
+      </div>
+      <div className="flex flex-1 flex-col p-5">{children}</div>
+    </Link>
+  );
+}
+
+/* ------------------------------------------------------------------ research */
 
 export interface ResearchCardData {
   slug: string;
@@ -28,55 +81,44 @@ export interface ResearchCardData {
   viewCount?: number;
 }
 
+const RESEARCH_SLOTS: CatalogSlot[] = ['research', 'data', 'expeditions', 'region-arctic', 'region-antarctic'];
+
 export function ResearchCard({ data }: { data: ResearchCardData }) {
   const authorNames = (data.authors ?? []).map((a) => a.researcher.fullName);
   return (
-    <Card className="flex h-full flex-col hover:shadow-md">
-      <CardHeader className="pb-3">
-        <div className="mb-2 flex flex-wrap items-center gap-1.5">
-          <Badge variant="secondary">{REPOSITORY_TYPE_LABELS[data.type] ?? data.type}</Badge>
+    <CardShell
+      href={`/repository/${data.slug}`}
+      slot={pickSlot(data.slug, RESEARCH_SLOTS)}
+      seed={data.slug}
+      alt=""
+      badges={
+        <>
           <Badge variant="accent">{POLE_LABELS[data.pole]}</Badge>
           {data.isDemo ? <Badge variant="demo">Demo</Badge> : null}
-        </div>
-        <CardTitle>
-          <Link href={`/repository/${data.slug}`} className="hover:text-accent hover:underline">
-            {data.title}
-          </Link>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-1 flex-col pt-0">
-        <p className="text-sm text-muted-foreground">{truncate(data.abstract, 180)}</p>
-        <dl className="mt-4 space-y-1 text-xs text-muted-foreground">
-          {authorNames.length ? (
-            <div className="flex gap-1">
-              <dt className="font-medium text-foreground">Authors:</dt>
-              <dd>{authorNames.slice(0, 3).join(', ')}{authorNames.length > 3 ? ' et al.' : ''}</dd>
-            </div>
-          ) : null}
-          {data.institution ? (
-            <div className="flex gap-1">
-              <dt className="font-medium text-foreground">Institution:</dt>
-              <dd>{data.institution.name}</dd>
-            </div>
-          ) : null}
-          <div className="flex gap-3">
-            <span>{DISCIPLINE_LABELS[data.discipline] ?? data.discipline}</span>
-            <span>{formatDate(data.publicationDate)}</span>
-          </div>
-        </dl>
-        {data.keywords?.length ? (
-          <div className="mt-3 flex flex-wrap gap-1">
-            {data.keywords.slice(0, 4).map((k) => (
-              <span key={k} className="rounded bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground">
-                {k}
-              </span>
-            ))}
-          </div>
-        ) : null}
-      </CardContent>
-    </Card>
+        </>
+      }
+    >
+      <MetaRow
+        items={[
+          REPOSITORY_TYPE_LABELS[data.type] ?? data.type,
+          DISCIPLINE_LABELS[data.discipline],
+          formatDate(data.publicationDate, { year: 'numeric' }),
+        ]}
+      />
+      <h3 className="mt-3 font-display text-lg font-medium leading-snug tracking-tight transition-colors group-hover:text-accent">
+        {data.title}
+      </h3>
+      <p className="mt-2 flex-1 text-sm text-muted-foreground">{truncate(data.abstract, 150)}</p>
+      <p className="mt-4 metadata">
+        {authorNames.length
+          ? `${authorNames.slice(0, 2).join(', ')}${authorNames.length > 2 ? ' et al.' : ''}`
+          : data.institution?.name ?? '—'}
+      </p>
+    </CardShell>
   );
 }
+
+/* ------------------------------------------------------------------ dataset */
 
 export interface DatasetCardData {
   slug: string;
@@ -92,38 +134,29 @@ export interface DatasetCardData {
 
 export function DatasetCard({ data }: { data: DatasetCardData }) {
   return (
-    <Card className="flex h-full flex-col hover:shadow-md">
-      <CardHeader className="pb-3">
-        <div className="mb-2 flex flex-wrap items-center gap-1.5">
-          <Database className="h-4 w-4 text-accent" />
+    <CardShell
+      href={`/data/${data.slug}`}
+      slot="data"
+      seed={data.slug}
+      alt=""
+      badges={
+        <>
           <Badge variant="accent">{POLE_LABELS[data.pole]}</Badge>
           {data.isDemo ? <Badge variant="demo">Demo dataset</Badge> : null}
-        </div>
-        <CardTitle>
-          <Link href={`/data/${data.slug}`} className="hover:text-accent hover:underline">
-            {data.title}
-          </Link>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-1 flex-col pt-0">
-        <p className="text-sm text-muted-foreground">{truncate(data.description, 160)}</p>
-        <dl className="mt-4 space-y-1 text-xs text-muted-foreground">
-          <div className="flex gap-1">
-            <dt className="font-medium text-foreground">Source:</dt>
-            <dd>{data.source}</dd>
-          </div>
-          {data.unit ? (
-            <div className="flex gap-1">
-              <dt className="font-medium text-foreground">Unit:</dt>
-              <dd>{data.unit}</dd>
-            </div>
-          ) : null}
-          <div>{DISCIPLINE_LABELS[data.discipline] ?? data.discipline}</div>
-        </dl>
-      </CardContent>
-    </Card>
+        </>
+      }
+    >
+      <MetaRow items={[DISCIPLINE_LABELS[data.discipline], data.unit ?? undefined]} />
+      <h3 className="mt-3 font-display text-lg font-medium leading-snug tracking-tight transition-colors group-hover:text-accent">
+        {data.title}
+      </h3>
+      <p className="mt-2 flex-1 text-sm text-muted-foreground">{truncate(data.description, 140)}</p>
+      <p className="mt-4 metadata">Source — {data.source}</p>
+    </CardShell>
   );
 }
+
+/* ------------------------------------------------------------------ media */
 
 export interface MediaCardData {
   slug: string;
@@ -137,47 +170,46 @@ export interface MediaCardData {
 }
 
 export function MediaCard({ data }: { data: MediaCardData }) {
+  const editorial = getEditorialImage('media', 900);
+  const candidates = data.thumbnailUrl
+    ? [data.thumbnailUrl, ...editorial.candidates]
+    : editorial.candidates;
   return (
     <Link
       href={`/media/${data.slug}`}
-      className="group block overflow-hidden rounded-xl border border-border bg-card transition-shadow hover:shadow-md"
+      className="group relative block overflow-hidden border border-border bg-surface"
     >
-      <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
-        {data.thumbnailUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={data.thumbnailUrl}
-            alt={data.title}
-            loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-            <ImageIcon className="h-8 w-8" />
-          </div>
-        )}
-        <span className="absolute left-2 top-2 rounded bg-navy/80 px-1.5 py-0.5 text-[11px] font-medium text-white">
+      <div className="relative aspect-[4/3] w-full overflow-hidden">
+        <SmartImage
+          candidates={candidates}
+          fallback={editorial.fallback}
+          alt={data.title}
+          sizes="(max-width:768px) 50vw, 25vw"
+          className="h-full w-full"
+          imgClassName="transition-transform [transition-duration:900ms] ease-editorial group-hover:scale-[1.05]"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-black/20 opacity-70 transition-opacity duration-300 group-hover:opacity-90" />
+        <span className="absolute left-3 top-3 metadata text-white/80">
           {MEDIA_TYPE_LABELS[data.type] ?? data.type}
         </span>
         {data.isDemo ? (
-          <span className="absolute right-2 top-2 rounded border border-dashed border-amber-300 bg-amber-500/80 px-1.5 py-0.5 text-[11px] font-medium text-white">
-            Demo
+          <span className="absolute right-3 top-3">
+            <Badge variant="demo">Demo</Badge>
           </span>
         ) : null}
-      </div>
-      <div className="p-4">
-        <h3 className="font-display text-sm font-semibold leading-tight group-hover:text-accent">
-          {data.title}
-        </h3>
-        {data.creator ? (
-          <p className="mt-1 text-xs text-muted-foreground">© {data.creator} · {data.license}</p>
-        ) : (
-          <p className="mt-1 text-xs text-muted-foreground">{data.license}</p>
-        )}
+        <div className="absolute inset-x-0 bottom-0 p-4">
+          <h3 className="font-display text-sm font-medium leading-snug text-white">{data.title}</h3>
+          <p className="mt-1 text-[0.68rem] uppercase tracking-[0.12em] text-white/60">
+            {data.creator ? `${data.creator} — ` : ''}
+            {data.license}
+          </p>
+        </div>
       </div>
     </Link>
   );
 }
+
+/* ------------------------------------------------------------------ event */
 
 export interface EventCardData {
   slug: string;
@@ -192,38 +224,39 @@ export interface EventCardData {
 
 export function EventCard({ data }: { data: EventCardData }) {
   return (
-    <Card className="flex h-full flex-col hover:shadow-md">
-      <CardHeader className="pb-3">
-        <div className="mb-2 flex flex-wrap items-center gap-1.5">
-          <Badge variant="secondary">{EVENT_TYPE_LABELS[data.type] ?? data.type}</Badge>
-          <Badge variant="outline">{data.mode.replace('_', '-').toLowerCase()}</Badge>
-          {data.registrationStatus === 'OPEN' ? (
-            <Badge variant="success">Registration open</Badge>
-          ) : data.registrationStatus === 'WAITLIST' ? (
-            <Badge variant="warning">Waitlist</Badge>
-          ) : data.registrationStatus === 'CLOSED' ? (
-            <Badge variant="danger">Closed</Badge>
-          ) : null}
-        </div>
-        <CardTitle>
-          <Link href={`/events/${data.slug}`} className="hover:text-accent hover:underline">
-            {data.title}
-          </Link>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="pt-0 text-sm text-muted-foreground">
-        <p className="flex items-center gap-1.5">
-          <CalendarDays className="h-4 w-4" /> {formatDate(data.startAt, { dateStyle: 'full' })}
-        </p>
-        {data.locationName ? (
-          <p className="mt-1 flex items-center gap-1.5">
-            <MapPin className="h-4 w-4" /> {data.locationName}
-          </p>
-        ) : null}
-      </CardContent>
-    </Card>
+    <CardShell
+      href={`/events/${data.slug}`}
+      slot="events"
+      seed={data.slug}
+      alt=""
+      badges={
+        data.registrationStatus === 'OPEN' ? (
+          <Badge variant="success">Registration open</Badge>
+        ) : data.registrationStatus === 'WAITLIST' ? (
+          <Badge variant="warning">Waitlist</Badge>
+        ) : data.registrationStatus === 'CLOSED' ? (
+          <Badge variant="danger">Closed</Badge>
+        ) : null
+      }
+    >
+      <MetaRow
+        items={[
+          EVENT_TYPE_LABELS[data.type] ?? data.type,
+          data.mode.replace('_', '-').toLowerCase(),
+        ]}
+      />
+      <h3 className="mt-3 font-display text-lg font-medium leading-snug tracking-tight transition-colors group-hover:text-accent">
+        {data.title}
+      </h3>
+      <p className="mt-3 flex-1 text-sm text-muted-foreground">
+        {formatDate(data.startAt, { dateStyle: 'full' })}
+        {data.locationName ? ` · ${data.locationName}` : ''}
+      </p>
+    </CardShell>
   );
 }
+
+/* ------------------------------------------------------------------ expedition */
 
 export interface ExpeditionCardData {
   slug: string;
@@ -238,29 +271,36 @@ export interface ExpeditionCardData {
 
 export function ExpeditionCard({ data }: { data: ExpeditionCardData }) {
   return (
-    <Card className="flex h-full flex-col hover:shadow-md">
-      <CardHeader className="pb-3">
-        <div className="mb-2 flex items-center gap-1.5">
-          <Compass className="h-4 w-4 text-accent" />
+    <CardShell
+      href={`/expeditions/${data.slug}`}
+      slot="expeditions"
+      seed={data.slug}
+      alt=""
+      aspect="aspect-[3/2]"
+      badges={
+        <>
           {data.region ? <Badge variant="accent">{data.region.name}</Badge> : null}
           {data.isDemo ? <Badge variant="demo">Demo</Badge> : null}
-        </div>
-        <CardTitle>
-          <Link href={`/expeditions/${data.slug}`} className="hover:text-accent hover:underline">
-            {data.name}
-          </Link>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="flex-1 pt-0 text-sm text-muted-foreground">
-        {data.summary ? <p>{truncate(data.summary, 150)}</p> : null}
-        <p className="mt-3 text-xs">
-          {data.vessel ? `${data.vessel} · ` : ''}
-          {formatDate(data.startDate)} – {formatDate(data.endDate)}
-        </p>
-      </CardContent>
-    </Card>
+        </>
+      }
+    >
+      <MetaRow
+        items={[
+          data.vessel ?? undefined,
+          `${formatDate(data.startDate, { year: 'numeric', month: 'short' })} – ${formatDate(data.endDate, { year: 'numeric', month: 'short' })}`,
+        ]}
+      />
+      <h3 className="mt-3 font-display text-lg font-medium leading-snug tracking-tight transition-colors group-hover:text-accent">
+        {data.name}
+      </h3>
+      {data.summary ? (
+        <p className="mt-2 flex-1 text-sm text-muted-foreground">{truncate(data.summary, 130)}</p>
+      ) : null}
+    </CardShell>
   );
 }
+
+/* ------------------------------------------------------------------ article */
 
 export interface ArticleCardData {
   slug: string;
@@ -274,34 +314,32 @@ export interface ArticleCardData {
 
 export function ArticleCard({ data }: { data: ArticleCardData }) {
   return (
-    <Card className="flex h-full flex-col overflow-hidden hover:shadow-md">
-      {data.heroImageUrl ? (
-        <div className="aspect-[16/9] w-full overflow-hidden bg-muted">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={data.heroImageUrl} alt="" loading="lazy" className="h-full w-full object-cover" />
-        </div>
+    <CardShell
+      href={`/news/${data.slug}`}
+      slot="news"
+      seed={data.slug}
+      imageSrc={data.heroImageUrl}
+      alt=""
+      aspect="aspect-[16/10]"
+      badges={<Badge variant="outline">{NEWS_CATEGORY_LABELS[data.category] ?? data.category}</Badge>}
+    >
+      <MetaRow
+        items={[
+          data.author?.name ?? undefined,
+          formatDate(data.publishedAt, { dateStyle: 'medium' }),
+        ]}
+      />
+      <h3 className="mt-3 font-display text-lg font-medium leading-snug tracking-tight transition-colors group-hover:text-accent">
+        {data.title}
+      </h3>
+      {data.subtitle ? (
+        <p className="mt-2 flex-1 text-sm text-muted-foreground">{truncate(data.subtitle, 130)}</p>
       ) : null}
-      <CardHeader className="pb-3">
-        <div className="mb-2 flex items-center gap-1.5">
-          <Newspaper className="h-4 w-4 text-accent" />
-          <Badge variant="secondary">{NEWS_CATEGORY_LABELS[data.category] ?? data.category}</Badge>
-        </div>
-        <CardTitle>
-          <Link href={`/news/${data.slug}`} className="hover:text-accent hover:underline">
-            {data.title}
-          </Link>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="flex-1 pt-0 text-sm text-muted-foreground">
-        {data.subtitle ? <p>{truncate(data.subtitle, 140)}</p> : null}
-        <p className="mt-3 text-xs">
-          {data.author?.name ? `${data.author.name} · ` : ''}
-          {formatDate(data.publishedAt)}
-        </p>
-      </CardContent>
-    </Card>
+    </CardShell>
   );
 }
+
+/* ------------------------------------------------------------------ education */
 
 export interface EducationCardData {
   slug: string;
@@ -314,28 +352,29 @@ export interface EducationCardData {
 
 export function EducationCard({ data }: { data: EducationCardData }) {
   return (
-    <Card className="flex h-full flex-col hover:shadow-md">
-      <CardHeader className="pb-3">
-        <div className="mb-2 flex items-center gap-1.5">
-          <GraduationCap className="h-4 w-4 text-accent" />
-          <Badge variant="secondary">{EDUCATION_TYPE_LABELS[data.type] ?? data.type}</Badge>
-        </div>
-        <CardTitle>
-          <Link href={`/education/${data.slug}`} className="hover:text-accent hover:underline">
-            {data.title}
-          </Link>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="flex-1 pt-0 text-sm text-muted-foreground">
-        <p>{truncate(data.summary, 150)}</p>
-        <p className="mt-3 text-xs">
-          {data.ageGroup ? `${data.ageGroup}` : 'All ages'}
-          {data.durationMin ? ` · ${data.durationMin} min` : ''}
-        </p>
-      </CardContent>
-    </Card>
+    <CardShell
+      href={`/education/${data.slug}`}
+      slot="education"
+      seed={data.slug}
+      alt=""
+      aspect="aspect-[3/2]"
+      badges={<Badge variant="outline">{EDUCATION_TYPE_LABELS[data.type] ?? data.type}</Badge>}
+    >
+      <MetaRow
+        items={[
+          data.ageGroup ?? 'All ages',
+          data.durationMin ? `${data.durationMin} min` : undefined,
+        ]}
+      />
+      <h3 className="mt-3 font-display text-lg font-medium leading-snug tracking-tight transition-colors group-hover:text-accent">
+        {data.title}
+      </h3>
+      <p className="mt-2 flex-1 text-sm text-muted-foreground">{truncate(data.summary, 130)}</p>
+    </CardShell>
   );
 }
+
+/* ------------------------------------------------------------------ topic */
 
 export interface TopicCardData {
   slug: string;
@@ -344,20 +383,30 @@ export interface TopicCardData {
   overview?: string | null;
 }
 
+const TOPIC_SLOTS: CatalogSlot[] = ['region-arctic', 'region-antarctic', 'data', 'media', 'aurora', 'glossary'];
+
 export function TopicCard({ data }: { data: TopicCardData }) {
   return (
     <Link
       href={`/explore/${data.slug}`}
-      className="group flex h-full flex-col rounded-xl border border-border bg-card p-5 transition-shadow hover:shadow-md"
+      className="group flex flex-col justify-between border border-border bg-surface p-6 transition-colors duration-300 ease-editorial hover:border-foreground/30"
     >
-      <FileText className="mb-3 h-5 w-5 text-accent" />
-      <h3 className="font-display font-semibold group-hover:text-accent">{data.name}</h3>
-      {data.overview ? (
-        <p className="mt-2 text-sm text-muted-foreground">{truncate(data.overview, 120)}</p>
-      ) : null}
-      <span className="mt-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        {data.category}
-      </span>
+      <div
+        className="mb-6 h-24 w-full opacity-80 transition-opacity group-hover:opacity-100"
+        style={{
+          backgroundImage: getEditorialImage(pickSlot(data.slug, TOPIC_SLOTS)).fallback,
+        }}
+        aria-hidden
+      />
+      <div>
+        <p className="metadata">{data.category}</p>
+        <h3 className="mt-2 font-display text-xl font-medium tracking-tight transition-colors group-hover:text-accent">
+          {data.name}
+        </h3>
+        {data.overview ? (
+          <p className="mt-3 text-sm text-muted-foreground">{truncate(data.overview, 110)}</p>
+        ) : null}
+      </div>
     </Link>
   );
 }

@@ -3,10 +3,8 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, Snowflake } from 'lucide-react';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { PRIMARY_NAV, SITE } from '@/lib/constants';
+import { Menu, X } from 'lucide-react';
+import { EDITORIAL_NAV, EDITORIAL_NAV_MORE } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 
 export function MobileNav() {
@@ -17,59 +15,110 @@ export function MobileNav() {
     setOpen(false);
   }, [pathname]);
 
+  React.useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [open]);
+
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Open navigation menu">
-          <Menu className="h-5 w-5" />
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="left-0 top-0 h-dvh max-w-xs translate-x-0 translate-y-0 rounded-none border-y-0 border-l-0 data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left">
-        <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 font-display font-semibold">
-            <Snowflake className="h-5 w-5 text-accent" />
-            {SITE.name}
-          </Link>
-          <Button variant="ghost" size="icon" onClick={() => setOpen(false)} aria-label="Close menu">
-            <X className="h-5 w-5" />
-          </Button>
-        </div>
-        <nav className="mt-4 flex flex-col gap-1">
-          <Link
-            href="/"
-            className={cn(
-              'rounded-md px-3 py-2 text-sm font-medium hover:bg-secondary',
-              pathname === '/' && 'bg-secondary text-accent',
-            )}
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        aria-label="Open menu"
+        aria-expanded={open}
+        className="inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-current/10 lg:hidden"
+      >
+        <Menu className="h-5 w-5" />
+      </button>
+
+      <div
+        className={cn(
+          'fixed inset-0 z-[60] bg-navy text-white transition-[opacity,visibility] duration-500 ease-editorial lg:hidden',
+          open ? 'visible opacity-100' : 'invisible opacity-0',
+        )}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Site navigation"
+      >
+        <div className="grain absolute inset-0 -z-10 aurora-bg opacity-60" aria-hidden />
+        <div className="editorial flex h-[var(--header-h)] items-center justify-between">
+          <span className="font-display text-[0.95rem] font-medium uppercase tracking-[0.18em]">
+            Polar Science
+          </span>
+          <button
+            onClick={() => setOpen(false)}
+            aria-label="Close menu"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-white/10"
           >
-            Home
-          </Link>
-          {PRIMARY_NAV.map((item) => (
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <nav className="editorial mt-6 flex flex-col">
+          {[{ label: 'Home', href: '/' }, ...EDITORIAL_NAV].map((item, i) => {
+            const active =
+              item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  'flex items-baseline gap-4 border-b border-white/10 py-5 transition-colors',
+                  active ? 'text-white' : 'text-white/70 hover:text-white',
+                )}
+                style={{
+                  transitionDelay: open ? `${80 + i * 45}ms` : '0ms',
+                  opacity: open ? 1 : 0,
+                  transform: open ? 'none' : 'translateY(12px)',
+                  transitionProperty: 'opacity, transform, color',
+                  transitionDuration: '500ms',
+                  transitionTimingFunction: 'cubic-bezier(0.22,1,0.36,1)',
+                }}
+              >
+                <span className="metadata text-white/40">
+                  {String(i).padStart(2, '0')}
+                </span>
+                <span className="display-3 font-display">{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="editorial mt-8 flex flex-wrap gap-x-6 gap-y-2">
+          {EDITORIAL_NAV_MORE.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className={cn(
-                'rounded-md px-3 py-2 text-sm font-medium hover:bg-secondary',
-                pathname.startsWith(item.href) && 'bg-secondary text-accent',
-              )}
+              className="metadata text-white/60 transition-colors hover:text-white"
             >
               {item.label}
             </Link>
           ))}
+        </div>
+
+        <div className="editorial mt-10 flex gap-4">
           <Link
-            href="/map"
-            className="rounded-md px-3 py-2 text-sm font-medium hover:bg-secondary"
+            href="/login"
+            className="metadata border border-white/25 px-5 py-3 transition-colors hover:bg-white hover:text-navy"
           >
-            Polar Map
+            Log in
           </Link>
           <Link
-            href="/glossary"
-            className="rounded-md px-3 py-2 text-sm font-medium hover:bg-secondary"
+            href="/bookmarks"
+            className="metadata border border-white/25 px-5 py-3 transition-colors hover:bg-white hover:text-navy"
           >
-            Glossary
+            Bookmarks
           </Link>
-        </nav>
-      </DialogContent>
-    </Dialog>
+        </div>
+      </div>
+    </>
   );
 }

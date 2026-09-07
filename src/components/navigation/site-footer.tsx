@@ -1,37 +1,40 @@
 import Link from 'next/link';
-import { Snowflake } from 'lucide-react';
 import { FOOTER_NAV, SITE } from '@/lib/constants';
 import { NewsletterForm } from '@/components/newsletter-form';
+import { Hairline } from '@/components/editorial/primitives';
 
 export function SiteFooter() {
   const year = new Date().getFullYear();
   return (
-    <footer className="mt-16 border-t border-border bg-card">
-      <div className="container-page py-12">
-        <div className="grid gap-10 lg:grid-cols-[1.4fr_repeat(4,1fr)]">
+    <footer className="border-t border-border bg-surface">
+      <div className="editorial py-20 sm:py-28">
+        <p className="display-2 max-w-5xl text-balance">
+          Understanding the poles
+          <br />
+          <span className="text-muted-foreground">means understanding our planet.</span>
+        </p>
+
+        <div className="mt-16 grid gap-12 lg:grid-cols-[1.3fr_repeat(4,1fr)]">
           <div>
-            <Link href="/" className="flex items-center gap-2">
-              <Snowflake className="h-6 w-6 text-accent" />
-              <span className="font-display text-base font-semibold">{SITE.name}</span>
-            </Link>
+            <p className="metadata">The Newsletter</p>
             <p className="mt-3 max-w-xs text-sm text-muted-foreground">
-              A dissemination platform for polar science. Content is curated from many
-              producers; each record carries its own source and licence.
+              New research, data releases, expeditions and events — monthly. Double opt-in,
+              unsubscribe anytime.
             </p>
-            <div className="mt-5 max-w-xs">
+            <div className="mt-5 max-w-sm">
               <NewsletterForm compact source="footer" />
             </div>
           </div>
 
           {FOOTER_NAV.map((col) => (
             <div key={col.heading}>
-              <h3 className="text-sm font-semibold">{col.heading}</h3>
-              <ul className="mt-3 space-y-2">
+              <p className="metadata">{col.heading}</p>
+              <ul className="mt-4 space-y-2.5">
                 {col.items.map((item) => (
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      className="text-sm text-muted-foreground hover:text-foreground hover:underline"
+                      className="link-reveal text-sm text-muted-foreground transition-colors hover:text-foreground"
                     >
                       {item.label}
                     </Link>
@@ -42,22 +45,25 @@ export function SiteFooter() {
           ))}
         </div>
 
-        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row">
+        <Hairline className="mt-16" />
+
+        <div className="mt-6 flex flex-col gap-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <p>
-            © {year} {SITE.name}. Demonstration platform — institutions, researchers and some
-            datasets are fictional and clearly labelled.
+            © {year} {SITE.name}. A dissemination platform — demonstration institutions,
+            researcher profiles and datasets are fictional and clearly labelled. Imagery via
+            Unsplash.
           </p>
-          <div className="flex flex-wrap gap-4">
-            <Link href="/about/privacy" className="hover:text-foreground hover:underline">
+          <div className="flex flex-wrap gap-x-6 gap-y-1">
+            <Link href="/about/privacy" className="hover:text-foreground">
               Privacy
             </Link>
-            <Link href="/about/terms" className="hover:text-foreground hover:underline">
+            <Link href="/about/terms" className="hover:text-foreground">
               Terms
             </Link>
-            <Link href="/about/accessibility" className="hover:text-foreground hover:underline">
+            <Link href="/about/accessibility" className="hover:text-foreground">
               Accessibility
             </Link>
-            <Link href="/about/data-policy" className="hover:text-foreground hover:underline">
+            <Link href="/about/data-policy" className="hover:text-foreground">
               Data Policy
             </Link>
           </div>

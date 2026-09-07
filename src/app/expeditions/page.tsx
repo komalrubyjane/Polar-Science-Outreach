@@ -53,6 +53,7 @@ export default async function ExpeditionsPage({
   return (
     <>
       <PageHero
+        imageSlot="expeditions"
         eyebrow="Expeditions"
         title="Polar field campaigns"
         description="Research cruises and field expeditions to the Arctic and Antarctic. Each has objectives, a route map, team, publications and a day-by-day journal."

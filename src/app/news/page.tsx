@@ -54,6 +54,7 @@ export default async function NewsPage({
   return (
     <>
       <PageHero
+        imageSlot="news"
         eyebrow="News"
         title="Polar science newsroom"
         description="Curated announcements and stories. Each article lists its author, publication date and references."

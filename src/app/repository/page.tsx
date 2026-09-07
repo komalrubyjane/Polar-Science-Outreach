@@ -83,6 +83,7 @@ export default async function RepositoryPage({
   return (
     <>
       <PageHero
+        imageSlot="research"
         eyebrow="Knowledge Repository"
         title="Search the polar science repository"
         description="A dissemination catalogue of research papers, reports, datasets, theses, conference and policy documents. Each record links to its source, licence and citation."

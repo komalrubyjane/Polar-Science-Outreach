@@ -65,6 +65,7 @@ export default async function InstitutionsPage({
   return (
     <>
       <PageHero
+        imageSlot="institutions"
         eyebrow="Directory"
         title="Institution directory"
         description="Universities, institutes and agencies contributing polar research. Demonstration institutions are fictional and clearly labelled."

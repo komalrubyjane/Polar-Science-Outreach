@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
-import { AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function Error({
@@ -13,24 +12,27 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Client-visible error boundary. The server has already logged details.
     console.error(error);
   }, [error]);
 
   return (
-    <div className="container-page flex min-h-[60vh] flex-col items-center justify-center py-20 text-center">
-      <AlertTriangle className="mb-4 h-12 w-12 text-destructive" />
-      <h1 className="font-display text-2xl font-semibold">Something went wrong</h1>
-      <p className="mt-2 max-w-md text-muted-foreground">
-        An unexpected error occurred while rendering this page. You can try again, or head back to
-        the homepage.
+    <div className="editorial flex min-h-[70vh] flex-col justify-center py-24">
+      <span className="eyebrow eyebrow-accent">
+        <span className="h-px w-6 bg-current" aria-hidden />
+        System error
+      </span>
+      <h1 className="display-1 mt-6 text-balance">Something went off course.</h1>
+      <p className="mt-6 max-w-md text-lg text-muted-foreground">
+        The polar signal was lost. You can try again, or head back to the homepage.
       </p>
       {error.digest ? (
-        <p className="mt-2 text-xs text-muted-foreground">Reference: {error.digest}</p>
+        <p className="metadata mt-4">Reference {error.digest}</p>
       ) : null}
-      <div className="mt-6 flex flex-wrap justify-center gap-3">
-        <Button onClick={reset}>Try again</Button>
-        <Button asChild variant="outline">
+      <div className="mt-10 flex flex-wrap gap-4">
+        <Button onClick={reset} size="lg">
+          Try again
+        </Button>
+        <Button asChild size="lg" variant="outline">
           <Link href="/">Return home</Link>
         </Button>
       </div>

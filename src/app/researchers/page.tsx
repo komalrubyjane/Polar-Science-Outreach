@@ -63,6 +63,7 @@ export default async function ResearchersPage({
   return (
     <>
       <PageHero
+        imageSlot="researchers"
         eyebrow="Directory"
         title="Researcher directory"
         description="Profiles of polar researchers. Demonstration profiles are fictional and clearly labelled — no invented findings are attributed to real people."
