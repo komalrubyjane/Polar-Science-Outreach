@@ -32,6 +32,8 @@ async function resolve(id: string): Promise<NormalizedSeries | null> {
     description: dataset.description,
     methodology: dataset.methodology ?? undefined,
     source: dataset.source,
+    sourceKey: 'PORTAL' as const,
+    cadence: 'historical' as const,
     sourceUrl: dataset.externalUrl ?? undefined,
     license: dataset.license,
     isDemo: dataset.isDemo,

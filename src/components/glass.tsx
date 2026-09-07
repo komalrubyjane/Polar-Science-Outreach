@@ -69,6 +69,73 @@ export function FloatingStat({
   );
 }
 
+/** Small glass pill naming the authoritative data source. */
+export function SourceBadge({
+  source,
+  className,
+  tone = 'auto',
+}: {
+  source: string;
+  className?: string;
+  tone?: 'auto' | 'light' | 'dark';
+}) {
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[0.62rem] font-medium uppercase tracking-[0.14em]',
+        tone === 'dark'
+          ? 'glass-dark text-white'
+          : tone === 'light'
+            ? 'glass text-foreground'
+            : 'border border-border bg-surface/70 text-muted-foreground',
+        className,
+      )}
+    >
+      <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
+      {source}
+    </span>
+  );
+}
+
+/** "LIVE" / "Updated 3h ago" freshness indicator from a real timestamp. */
+export function DataFreshness({
+  lastUpdated,
+  className,
+}: {
+  lastUpdated: string | null | undefined;
+  className?: string;
+}) {
+  if (!lastUpdated) {
+    return (
+      <span className={cn('metadata text-muted-foreground', className)}>Updated — unknown</span>
+    );
+  }
+  const d = new Date(lastUpdated);
+  const valid = !Number.isNaN(d.getTime());
+  const ageH = valid ? (Date.now() - d.getTime()) / 3_600_000 : Infinity;
+  const label = !valid
+    ? `Updated ${lastUpdated}`
+    : ageH < 3
+      ? 'Live'
+      : ageH < 48
+        ? `Updated ${Math.round(ageH)}h ago`
+        : `Updated ${d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 text-[0.62rem] font-medium uppercase tracking-[0.14em]',
+        ageH < 3 ? 'text-success' : 'text-muted-foreground',
+        className,
+      )}
+    >
+      {ageH < 3 ? (
+        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-success" aria-hidden />
+      ) : null}
+      {label}
+    </span>
+  );
+}
+
 /** Unobtrusive image attribution. */
 export function ImageCredit({
   credit,

@@ -12,12 +12,12 @@
     /* Fixed polar scale (used by the glass recipe + gradients) */
     --snow: 247 251 253;        /* #F7FBFD */
     --ice-c: 234 244 248;       /* #EAF4F8 */
-    --frost: 217 234 242;       /* #D9EAF2 */
-    --glacier-c: 188 215 229;   /* #BCD7E5 */
-    --mist: 158 191 210;        /* #9EBFD2 */
+    --frost: 220 235 242;       /* #D9EAF2 */
+    --glacier-c: 192 217 229;   /* #BCD7E5 */
+    --mist: 161 193 211;        /* #9EBFD2 */
     --water: 111 157 184;       /* #6F9DB8 */
     --ocean: 61 113 143;        /* #3D718F */
-    --deep-water: 35 81 109;    /* #23516D */
+    --deep-water: 36 83 110;    /* #23516D */
     --polar-navy: 18 58 82;     /* #123A52 */
     --polar-night: 7 31 50;     /* #071F32 */
 

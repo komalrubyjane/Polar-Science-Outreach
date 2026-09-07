@@ -13,6 +13,9 @@ export interface SeriesPoint {
   value: number;
 }
 
+/** Short identifier for the authoritative provider, used by <SourceBadge>. */
+export type SourceKey = 'NSIDC' | 'NASA' | 'NOAA' | 'USAP' | 'DEMO' | 'PORTAL';
+
 export interface NormalizedSeries {
   id: string;
   name: string;
@@ -21,13 +24,19 @@ export interface NormalizedSeries {
   description: string;
   methodology?: string;
   source: string;
+  sourceKey: SourceKey;
   sourceUrl?: string;
   license: string;
+  citation?: string;
   isDemo: boolean;
-  /** When the underlying data was last refreshed by the source. */
+  /** How the point cadence should be read: real observations vs. demo. */
+  cadence: 'observation' | 'near-real-time' | 'historical' | 'demo';
+  /** When the underlying data was last refreshed by the source (ISO or label). */
   lastUpdated: string;
   /** Set when live fetch failed and cached / demo data is being shown. */
   degraded?: { reason: string; cachedFrom: string };
+  /** Set (with `points: []`) when there is genuinely no data to show. */
+  unavailable?: { reason: string; source: string; attemptedAt: string };
   points: SeriesPoint[];
 }
 

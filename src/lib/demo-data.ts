@@ -515,9 +515,10 @@ function slugify(s: string): string {
 }
 
 /**
- * Return `real` if it has anything; otherwise `demo` — UNLESS the user has an
- * active search/filter (`active`), in which case an empty real result is a
- * genuine "no matches" and we keep it empty.
+ * Return `real` if it has anything; otherwise, ONLY when `DEMO_MODE=true`,
+ * `demo`. Production (DEMO_MODE=false) always returns the real result so
+ * genuine empty states are shown honestly. An active search/filter also keeps
+ * the real (empty) result — a real "no matches" is never masked.
  */
 export function demoFallback<A, B>(
   real: A[],
@@ -525,8 +526,21 @@ export function demoFallback<A, B>(
   opts: { active?: boolean } = {},
 ): { items: (A | B)[]; isDemo: boolean } {
   if (real.length > 0) return { items: real, isDemo: false };
-  if (opts.active) return { items: real, isDemo: false };
+  if (opts.active || !demoEnabled()) return { items: real, isDemo: false };
   return { items: demo, isDemo: true };
+}
+
+let _demoMode: boolean | null = null;
+/** Whether demonstration fallback content is enabled (env DEMO_MODE). */
+export function demoEnabled(): boolean {
+  if (_demoMode === null) {
+    // Read lazily so this module stays importable from any context.
+    _demoMode =
+      (typeof process !== 'undefined' &&
+        (process.env.DEMO_MODE === 'true' || process.env.DEMO_MODE === '1')) ||
+      false;
+  }
+  return _demoMode;
 }
 
 const DEMO_INDEX = {
@@ -544,12 +558,12 @@ const DEMO_INDEX = {
 
 export type DemoKind = keyof typeof DEMO_INDEX;
 
-/** Look up a single demo record by slug for detail-page fallback. */
+/** Look up a single demo record by slug for detail-page fallback (DEMO_MODE only). */
 export function findDemo<K extends DemoKind>(
   kind: K,
   slug: string,
 ): (typeof DEMO_INDEX)[K][number] | null {
-  if (!slug.startsWith(DEMO)) return null;
+  if (!demoEnabled() || !slug.startsWith(DEMO)) return null;
   return (DEMO_INDEX[kind] as ReadonlyArray<{ slug: string }>).find(
     (r) => r.slug === slug,
   ) as (typeof DEMO_INDEX)[K][number] | null ?? null;

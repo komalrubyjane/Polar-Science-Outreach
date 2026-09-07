@@ -35,6 +35,8 @@ export function SeriesChart({
   kind?: 'area' | 'line' | 'bar';
   height?: number;
 }) {
+  const hasData = points.length >= 2;
+
   const summary = React.useMemo(() => {
     if (points.length === 0) return 'No data points available.';
     const values = points.map((p) => p.value);
@@ -48,6 +50,14 @@ export function SeriesChart({
   }, [points, unit, label]);
 
   const Chart = kind === 'line' ? LineChart : AreaChart;
+
+  if (!hasData) {
+    return (
+      <div className="flex h-40 items-center justify-center rounded-card border border-dashed border-border text-sm text-muted-foreground">
+        No observations available to chart.
+      </div>
+    );
+  }
 
   return (
     <figure className="w-full">

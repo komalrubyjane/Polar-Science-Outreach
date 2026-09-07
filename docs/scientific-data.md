@@ -2,66 +2,82 @@
 
 ## Principle
 
-The portal **never fabricates scientific measurements**. When it cannot reach a
-real source it shows clearly-labelled demo data or the latest cached data, always
-with a visible badge and a "last updated" date.
+The portal **never fabricates scientific measurements**. Real data is the only
+source in production. Where a source has no data, the UI shows an honest
+"Data temporarily unavailable" state — not invented values.
 
-## DataProvider abstraction
+`DEMO_MODE` (env, **default `false`**) is the single switch:
 
-`src/lib/data-providers/`:
+| `DEMO_MODE` | Behaviour |
+| --- | --- |
+| `false` (production) | Real data only. Empty DB tables / failed sources → real empty & "unavailable" states. |
+| `true` (local / preview) | Bundled demonstration content fills gaps, always flagged **"Demo"**. |
+
+Sea ice is **always real** regardless of `DEMO_MODE` — it reads a public NSIDC
+dataset that needs no credentials.
+
+## Real sources
+
+| Domain | Provider | Source | Auth | Default |
+| --- | --- | --- | --- | --- |
+| Sea ice extent (Arctic + Antarctic) | `SeaIceProvider` | **NSIDC Sea Ice Index v4** daily-extent CSV, aggregated to monthly means | none | live |
+| Climate & atmosphere | `ClimateProvider` | `CLIMATE_DATA_API_URL` or NASA Earthdata (`NASA_EARTHDATA_API_URL`) | server-side token | configure |
+| Ocean | `OceanProvider` | `OCEAN_DATA_API_URL` or NOAA (`NOAA_API_URL`) | server-side token | configure |
+| Ice sheets & glaciers | `CryosphereProvider` | NASA Earthdata | server-side token | configure |
+| Research stations / expeditions metadata | DB + `USAP_API_URL` catalogue links | US Antarctic Program | none | links |
+
+All credentials are read **server-side only**. None are prefixed `NEXT_PUBLIC_`.
+
+## NSIDC Sea Ice Index (live, no key)
+
+`src/lib/data-providers/nsidc.ts` fetches
+`https://noaadata.apps.nsidc.org/NOAA/G02135/{north|south}/daily/data/{N|S}_seaice_extent_daily_v4.0.csv`,
+parses the `Year, Month, Day, Extent, …` columns, drops missing rows, and returns
+monthly means for the last ~9 years plus the date of the most recent daily
+observation.
+
+- Wrapped in React `cache()` (per-render dedup) and `fetch(... { next: { revalidate: 21600 } })` (6-hour data cache).
+- Citation stored: *Fetterer, F., et al. Sea Ice Index, Version 4. NSIDC. https://doi.org/10.7265/N5K072F8*
+- Shown via `<DataProvenance>` (source / last updated / licence / methodology / citation / "View source") and `<SourceBadge>` + `<DataFreshness>` ("Live" / "Updated Nh ago").
+
+## Fallback chain
 
 ```
-DataProvider (interface)
-  key, label
-  list(): { id, name }[]
-  get(id): NormalizedSeries | null
-
-BaseProvider (abstract)  ── tries `endpoint`, falls back to the matching demo
-  ├── SeaIceProvider       (env NSIDC_SEA_ICE_API_URL)
-  ├── ClimateProvider      (env CLIMATE_DATA_API_URL)
-  ├── OceanProvider        (env OCEAN_DATA_API_URL)
-  └── CryosphereProvider   (demo-only)
+real source (cached 6h)
+  → cached real data (Next data cache)
+  → DEMO_MODE ? demo series (flagged "Demo", `degraded` note)
+             : NormalizedSeries with points:[] and an `unavailable` marker
 ```
 
-`NormalizedSeries` is the single shape the UI consumes:
-
-```ts
-{ id, name, unit, pole, description, methodology?, source, sourceUrl?, license,
-  isDemo, lastUpdated, degraded?: { reason, cachedFrom }, points: { t, value }[] }
-```
-
-## Behaviour
-
-- **No endpoint configured** → `get()` returns the demo series (`isDemo: true`).
-- **Endpoint configured, fetch OK** → upstream payload is merged over the demo
-  shape with `isDemo: false`. `fetch` uses `next: { revalidate: 3600 }`.
-- **Endpoint configured, fetch fails / empty** → returns the demo series with a
-  `degraded` note; the UI shows an amber "live data unavailable" banner and the
-  cached date. No values are invented.
+`NormalizedSeries.unavailable = { reason, source, attemptedAt }` drives the
+"Data temporarily unavailable" panel on `/data/[slug]` and the homepage teaser.
 
 ## Adding a real provider
 
-1. Create `class MyProvider extends BaseProvider` with a `key`, `label`,
-   `endpoint` (an env var) and `demoIds` (fallback series that already exist in
-   `demo.ts`, or add new ones).
-2. Your endpoint should accept `?series=<id>` and return JSON matching
-   `Partial<NormalizedSeries>` — at minimum `points: {t,value}[]`, plus `source`,
-   `unit`, `license`, `lastUpdated`.
-3. Register it in the `PROVIDERS` array in `src/lib/data-providers/index.ts`.
-4. Add the env var to `.env.example` and `src/lib/env.ts`.
+1. Create `class MyProvider extends BaseProvider` with a `sourceKey`
+   (`'NASA' | 'NOAA' | 'USAP' | …`), an `endpoint` env var, and `seriesIds`.
+2. Endpoint accepts `?series=<id>` and returns JSON matching
+   `Partial<NormalizedSeries>` (at minimum `points: {t,value}[]`, plus `unit`,
+   `source`, `license`, `lastUpdated`).
+3. Register it in `PROVIDERS` in `src/lib/data-providers/index.ts`.
+4. Add the env var to `.env.example` + `src/lib/env.ts`.
 
-`/api/data/series` and `/api/data/series/:id` (with CSV/JSON export) pick it up
-automatically; so does the homepage snapshot and `/data`.
+`/api/data/series` and `/api/data/series/:id` (CSV / JSON export), the `/data`
+page and the homepage snapshot pick it up automatically.
 
-## DB-backed datasets
+## Classification & caching
 
-`Dataset` + `DatasetVersion` store curated series inline (`series` JSON) or link a
-`FileAsset`. `/data/:slug` and `/api/data/series/:slug` resolve a provider series
-first, then fall back to a published `Dataset` with the same slug.
+| Class | Example | Cache |
+| --- | --- | --- |
+| Near-real-time | NSIDC sea ice | 6 h |
+| Historical | ice-core, long records | 24 h+ |
+| Static metadata | research records, stations | DB, revalidate on write |
 
-## Demo generator
+## Images
 
-`src/lib/data-providers/demo.ts` uses a seeded PRNG to build monthly series
-(seasonal sinusoid + trend + bounded noise). Every series it produces has
-`isDemo: true`, a `source` of `"Demo dataset (generated)"` and a `methodology`
-string stating it is synthetic. **Do not cite demo data.**
+Editorial imagery uses curated Unsplash photo IDs stored in
+`src/lib/images/catalog.ts` (id + photographer + tone) — **no image-API request
+at render time**. `src/lib/images/queries.ts` maps each slot to a search term for
+the optional `UNSPLASH_ACCESS_KEY`-gated `searchImages()` (editor browsing only,
+cached 24 h). `SmartImage` degrades candidate → candidate → gradient; attribution
+renders through `<ImageCredit>`.

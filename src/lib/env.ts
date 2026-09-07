@@ -57,9 +57,25 @@ const schema = z.object({
 
   ANALYTICS_ENABLED: bool(true),
 
-  NSIDC_SEA_ICE_API_URL: z.string().optional().default(''),
+  /**
+   * When true, pages fall back to bundled demonstration content wherever the
+   * database or an external scientific source has no data. PRODUCTION DEFAULT
+   * IS FALSE — real data only, with honest "unavailable" states otherwise.
+   */
+  DEMO_MODE: bool(false),
+
+  // Sea ice: default is the public NSIDC Sea Ice Index daily-extent CSV (no key).
+  NSIDC_SEA_ICE_API_URL: z
+    .string()
+    .optional()
+    .default('https://noaadata.apps.nsidc.org/NOAA/G02135'),
   CLIMATE_DATA_API_URL: z.string().optional().default(''),
   OCEAN_DATA_API_URL: z.string().optional().default(''),
+  NASA_EARTHDATA_API_URL: z.string().optional().default(''),
+  NASA_EARTHDATA_TOKEN: z.string().optional().default(''),
+  NOAA_API_URL: z.string().optional().default(''),
+  NOAA_API_TOKEN: z.string().optional().default(''),
+  USAP_API_URL: z.string().optional().default('https://www.usap-dc.org/view/dataset'),
 
   // Optional editorial-imagery search (server-side only). Curated imagery works
   // without this; it only powers image browsing for editors.

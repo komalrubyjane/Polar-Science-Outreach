@@ -142,6 +142,8 @@ export function DataProvenance({
   license,
   version,
   methodology,
+  citation,
+  sourceUrl,
   isDemo,
   className,
 }: {
@@ -151,6 +153,8 @@ export function DataProvenance({
   license?: string | null;
   version?: string | null;
   methodology?: string | null;
+  citation?: string | null;
+  sourceUrl?: string | null;
   isDemo?: boolean;
   className?: string;
 }) {
@@ -162,7 +166,7 @@ export function DataProvenance({
     ['Licence', license],
   ];
   return (
-    <div className={cn('border border-border bg-surface-muted/60 p-4', className)}>
+    <div className={cn('rounded-card border border-border bg-surface-muted/60 p-4', className)}>
       <p className="metadata mb-3">Provenance</p>
       <dl className="grid gap-x-6 gap-y-1.5 text-xs sm:grid-cols-2">
         {rows
@@ -178,6 +182,22 @@ export function DataProvenance({
         <p className="mt-3 border-t border-border pt-3 text-xs text-muted-foreground">
           {methodology}
         </p>
+      ) : null}
+      {citation ? (
+        <div className="mt-3 border-t border-border pt-3">
+          <p className="metadata mb-1">Cite this dataset</p>
+          <p className="text-xs leading-relaxed text-muted-foreground">{citation}</p>
+        </div>
+      ) : null}
+      {sourceUrl ? (
+        <a
+          href={sourceUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-3 inline-block text-xs font-medium text-accent hover:underline"
+        >
+          View source →
+        </a>
       ) : null}
       {isDemo ? (
         <p className="mt-3 border border-dashed border-warning/50 bg-warning/[0.06] px-3 py-2 text-xs font-medium text-warning dark:text-warning">

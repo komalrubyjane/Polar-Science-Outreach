@@ -8,13 +8,16 @@ import {
   demoEducation,
   demoEvents,
   demoExpeditions,
+  demoEnabled,
 } from '@/lib/demo-data';
+import { SeaIceProvider } from '@/lib/data-providers';
 
 const PUBLISHED = { status: 'PUBLISHED' as const };
 
-/** Real rows if any, else a slice of demo content so the homepage is never bare. */
+/** Real rows if any; a slice of demo content only when DEMO_MODE is on. */
 function orDemo<A, B>(real: A[], demo: B[], take: number): (A | B)[] {
-  return real.length ? real : demo.slice(0, take);
+  if (real.length) return real;
+  return demoEnabled() ? demo.slice(0, take) : real;
 }
 
 const researchInclude = {
@@ -127,61 +130,78 @@ export async function getActiveExpeditions(take = 3) {
   return orDemo(real, demoExpeditions, take);
 }
 
+export interface SnapshotMetric {
+  value: number | null;
+  unit: string;
+  lastUpdated: string | null;
+  source: string;
+  unavailable: boolean;
+}
+
 export interface PolarSnapshot {
-  seaIceArcticExtent: number | null;
-  seaIceAntarcticExtent: number | null;
-  arcticTempAnomaly: number | null;
+  arcticSeaIce: SnapshotMetric;
+  antarcticSeaIce: SnapshotMetric;
   researchStations: number;
   activeExpeditions: number;
   recentPublications: number;
+  datasetsAvailable: number;
   generatedAt: string;
-  isDemo: boolean;
 }
 
 /**
- * Homepage "Live Polar Snapshot". Counts come from the database; the physical
- * metrics come from the demo data providers and are explicitly flagged as demo.
+ * Homepage "Live Polar Snapshot". Sea-ice figures are REAL — the latest monthly
+ * mean from the NSIDC Sea Ice Index (cached 6h). Counts are from the database.
+ * Nothing here is fabricated; missing values surface as `unavailable`.
  */
 export async function getPolarSnapshot(): Promise<PolarSnapshot> {
-  const { DEMO_SERIES } = await import('@/lib/data-providers/demo');
-  const arctic = DEMO_SERIES['arctic-sea-ice-extent']?.();
-  const antarctic = DEMO_SERIES['antarctic-sea-ice-extent']?.();
-  const temp = DEMO_SERIES['arctic-temperature-anomaly']?.();
-  const last = (arr: { value: number }[] | undefined): number | null =>
-    arr && arr.length ? arr[arr.length - 1]!.value : null;
+  const provider = new SeaIceProvider();
 
-  const [stations, expeditions, pubs] = await Promise.all([
-    safe(() => prisma.researchStation.count(), 0, 'stationCount'),
-    safe(
-      () =>
-        prisma.expedition.count({
-          where: { status: 'PUBLISHED', endDate: { gte: new Date() } },
-        }),
-      0,
-      'expeditionCount',
-    ),
-    safe(
-      () =>
-        prisma.research.count({
-          where: {
-            status: 'PUBLISHED',
-            publishedAt: { gte: new Date(Date.now() - 90 * 86_400_000) },
-          },
-        }),
-      0,
-      'pubCount',
-    ),
-  ]);
+  const [arcticSeries, antarcticSeries, stations, expeditions, pubs, datasets] =
+    await Promise.all([
+      safe(() => provider.get('arctic-sea-ice-extent'), null, 'snapshotArcticIce'),
+      safe(() => provider.get('antarctic-sea-ice-extent'), null, 'snapshotAntarcticIce'),
+      safe(() => prisma.researchStation.count(), 0, 'stationCount'),
+      safe(
+        () =>
+          prisma.expedition.count({
+            where: { status: 'PUBLISHED', endDate: { gte: new Date() } },
+          }),
+        0,
+        'expeditionCount',
+      ),
+      safe(
+        () =>
+          prisma.research.count({
+            where: {
+              status: 'PUBLISHED',
+              publishedAt: { gte: new Date(Date.now() - 90 * 86_400_000) },
+            },
+          }),
+        0,
+        'pubCount',
+      ),
+      safe(() => prisma.dataset.count({ where: PUBLISHED }), 0, 'datasetCount'),
+    ]);
+
+  const toMetric = (s: Awaited<ReturnType<typeof provider.get>>): SnapshotMetric => {
+    const last = s?.points.at(-1);
+    return {
+      value: last?.value ?? null,
+      unit: s?.unit ?? 'million km²',
+      lastUpdated: s?.lastUpdated || null,
+      source: s?.source ?? 'NSIDC Sea Ice Index',
+      unavailable: !last,
+    };
+  };
 
   return {
-    seaIceArcticExtent: last(arctic?.points),
-    seaIceAntarcticExtent: last(antarctic?.points),
-    arcticTempAnomaly: last(temp?.points),
-    researchStations: stations || 8,
-    activeExpeditions: expeditions || 3,
-    recentPublications: pubs || 6,
+    arcticSeaIce: toMetric(arcticSeries),
+    antarcticSeaIce: toMetric(antarcticSeries),
+    researchStations: stations,
+    activeExpeditions: expeditions,
+    recentPublications: pubs,
+    datasetsAvailable: datasets,
     generatedAt: new Date().toISOString(),
-    isDemo: true,
   };
 }
 

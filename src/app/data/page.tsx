@@ -1,33 +1,46 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Database, ArrowRight } from 'lucide-react';
+import { Database, ArrowUpRight } from 'lucide-react';
 import { PageHero } from '@/components/content/page-hero';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { listAllSeries, anyExternalProviderConfigured } from '@/lib/data-providers';
+import { SourceBadge, DataFreshness } from '@/components/glass';
+import { AnimatedNumber } from '@/components/motion';
+import {
+  getProviders,
+  realDataStatus,
+  SOURCE_LABELS,
+  type NormalizedSeries,
+} from '@/lib/data-providers';
 import { prisma } from '@/lib/db';
 import { safe } from '@/lib/safe';
 import { DatasetCard } from '@/components/content/cards';
-import { demoDatasets } from '@/lib/demo-data';
-import { AnimatedNumber } from '@/components/motion';
-import { DEMO_SERIES } from '@/lib/data-providers/demo';
-
-function metric(id: keyof typeof DEMO_SERIES) {
-  const s = DEMO_SERIES[id]();
-  return { name: s.name, unit: s.unit, last: s.points[s.points.length - 1]?.value ?? 0 };
-}
+import { demoDatasets, demoEnabled } from '@/lib/demo-data';
 
 export const metadata: Metadata = {
   title: 'Polar Data',
   description:
-    'Visualisations of polar environmental data — sea ice, temperature, ocean and cryosphere indicators — each with source, unit, methodology and CSV/JSON download.',
+    'Real polar environmental time-series — NSIDC sea ice and related indicators — each with source, unit, methodology, citation and CSV/JSON download.',
 };
 
-export const revalidate = 3600;
+// Cache the page for 30 minutes; NSIDC data itself is cached 6h in the provider.
+export const revalidate = 1800;
 
 export default async function DataPage() {
-  const providers = await listAllSeries();
-  const externalConfigured = anyExternalProviderConfigured();
+  const status = realDataStatus();
+
+  // Resolve every series once (deduped by Next's data cache).
+  const providerSeries = await Promise.all(
+    getProviders().map(async (p) => {
+      const list = await p.list();
+      const resolved = await Promise.all(
+        list.map((s) => safe(() => p.get(s.id), null, `data-${s.id}`)),
+      );
+      return {
+        provider: p.key,
+        label: p.label,
+        series: resolved.filter((s): s is NormalizedSeries => Boolean(s)),
+      };
+    }),
+  );
 
   const datasets = await safe(
     () =>
@@ -39,7 +52,12 @@ export default async function DataPage() {
     [],
     'dataDatasets',
   );
-  const datasetRows = datasets.length ? datasets : demoDatasets;
+  const datasetRows = datasets.length ? datasets : demoEnabled() ? demoDatasets : [];
+
+  const headline = providerSeries
+    .flatMap((p) => p.series)
+    .filter((s) => s.sourceKey === 'NSIDC' && !s.unavailable)
+    .slice(0, 3);
 
   return (
     <>
@@ -47,38 +65,41 @@ export default async function DataPage() {
         imageSlot="data"
         eyebrow="Polar Data"
         title="Read the changing pulse of Earth's frozen regions."
-        description="Interactive time-series for key polar indicators. The portal is a dissemination platform: every series shows its source, unit, methodology and last-updated date."
+        description="Real monthly sea-ice extent from the NSIDC Sea Ice Index, refreshed every six hours. Every series shows its source, unit, methodology, citation and last observation."
         breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'Polar Data' }]}
       >
-        <div className="grid gap-3 sm:grid-cols-3">
-          {[
-            metric('arctic-sea-ice-extent'),
-            metric('antarctic-sea-ice-extent'),
-            metric('southern-ocean-sst'),
-          ].map((m) => (
-            <div key={m.name} className="glass rounded-2xl px-4 py-3 text-foreground">
-              <p className="metadata">{m.name.replace(' (demo)', '')}</p>
-              <p className="mt-1 font-display text-2xl font-medium">
-                <AnimatedNumber value={m.last} decimals={1} suffix={` ${m.unit}`} />
-              </p>
-              <p className="mt-0.5 text-[0.7rem] text-warning">Demonstration dataset</p>
-            </div>
-          ))}
-        </div>
+        {headline.length ? (
+          <div className="grid gap-3 sm:grid-cols-3">
+            {headline.map((s) => {
+              const last = s.points.at(-1)!;
+              return (
+                <div key={s.id} className="glass rounded-2xl px-4 py-3 text-foreground">
+                  <p className="metadata">{s.name}</p>
+                  <p className="mt-1 font-display text-2xl font-medium">
+                    <AnimatedNumber value={last.value} decimals={2} suffix={` ${s.unit}`} />
+                  </p>
+                  <div className="mt-1.5 flex items-center gap-2">
+                    <SourceBadge source="NSIDC" tone="light" />
+                    <DataFreshness lastUpdated={s.lastUpdated} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : null}
       </PageHero>
 
       <div className="container-page py-10">
-        {!externalConfigured ? (
-          <div className="mb-8 rounded-lg border border-dashed border-warning/60 bg-warning/10 p-4 text-sm text-warning dark:text-warning">
-            <strong>Demo data mode.</strong> No external scientific data provider is configured
-            (see <code>NSIDC_SEA_ICE_API_URL</code> and related variables in{' '}
-            <code>.env</code>). All series below are clearly-labelled demo datasets generated for
-            interface demonstration — they are not measurements and must not be cited.
+        {!status.climate || !status.ocean ? (
+          <div className="mb-8 rounded-card border border-border bg-surface-muted/60 p-4 text-sm text-muted-foreground">
+            <strong className="text-foreground">Real data status.</strong> Sea ice is live from
+            NSIDC. Climate, ocean and cryosphere providers are not yet connected
+            {demoEnabled() ? ' — demonstration series are shown for those (DEMO_MODE).' : ' — those series show an "unavailable" state until a source is configured.'}
           </div>
         ) : null}
 
         <div className="space-y-10">
-          {providers.map((p) => (
+          {providerSeries.map((p) => (
             <section key={p.provider}>
               <div className="mb-4 flex items-center gap-2">
                 <Database className="h-5 w-5 text-accent" />
@@ -86,19 +107,27 @@ export default async function DataPage() {
               </div>
               <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {p.series.map((s) => (
-                  <Link key={s.id} href={`/data/${s.id}`}>
-                    <Card className="h-full transition-shadow hover:shadow-md">
-                      <CardHeader className="pb-2">
-                        <div className="mb-1 flex items-center justify-between">
-                          <Badge variant="demo">Demo</Badge>
-                          <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                        </div>
-                        <CardTitle className="text-base">{s.name}</CardTitle>
-                      </CardHeader>
-                      <CardContent className="text-xs text-muted-foreground">
-                        Open interactive chart with source, methodology and CSV / JSON download.
-                      </CardContent>
-                    </Card>
+                  <Link key={s.id} href={`/data/${s.id}`} className="card-ios group p-6">
+                    <div className="mb-3 flex items-center justify-between">
+                      <SourceBadge
+                        source={s.isDemo ? 'DEMO' : s.sourceKey}
+                        tone={s.isDemo ? 'auto' : 'auto'}
+                      />
+                      <ArrowUpRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                    </div>
+                    <p className="font-display text-base font-medium tracking-tight group-hover:text-accent">
+                      {s.name}
+                    </p>
+                    {s.unavailable ? (
+                      <p className="mt-2 text-xs text-warning">
+                        Data temporarily unavailable — {SOURCE_LABELS[s.sourceKey]}
+                      </p>
+                    ) : (
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        {s.points.length} points · {s.unit} ·{' '}
+                        <DataFreshness lastUpdated={s.lastUpdated} className="inline" />
+                      </p>
+                    )}
                   </Link>
                 ))}
               </div>

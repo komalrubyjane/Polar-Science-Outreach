@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/misc';
@@ -12,16 +13,22 @@ import {
 } from '@/components/editorial/primitives';
 import { CinematicHero } from '@/components/editorial/cinematic-hero';
 import { ScrollCue } from '@/components/editorial/scroll-cue';
-import { Reveal, Stagger, AnimatedNumber } from '@/components/motion';
-import { FloatingStat } from '@/components/glass';
+import { Reveal, Stagger } from '@/components/motion';
 import { SmartImage } from '@/components/editorial/smart-image';
-import { Sparkline } from '@/components/editorial/sparkline';
 import {
   MediaCard,
   EducationCard,
   ArticleCard,
 } from '@/components/content/cards';
 import { NewsletterForm } from '@/components/newsletter-form';
+import {
+  HeroPanels,
+  HeroPanelsSkeleton,
+  LiveSnapshot,
+  LiveSnapshotSkeleton,
+  DataTeaser,
+  DataTeaserSkeleton,
+} from '@/components/home/polar-data';
 import {
   getFeaturedResearch,
   getLatestDiscoveries,
@@ -30,8 +37,6 @@ import {
   getEducationHighlights,
   getActiveExpeditions,
 } from '@/lib/queries';
-import { DEMO_SERIES } from '@/lib/data-providers/demo';
-import { DEMO_COUNTS } from '@/lib/demo-data';
 import { getEditorialImage } from '@/lib/images/provider';
 import { formatDate } from '@/lib/utils';
 import { DISCIPLINE_LABELS, POLE_LABELS, REPOSITORY_TYPE_LABELS } from '@/lib/constants';
@@ -42,15 +47,6 @@ export const metadata: Metadata = {
 };
 
 export const revalidate = 300;
-
-function seriesStat(id: keyof typeof DEMO_SERIES) {
-  const s = DEMO_SERIES[id]();
-  const values = s.points.map((p) => p.value);
-  const first = values[0]!;
-  const last = values[values.length - 1]!;
-  const pct = first !== 0 ? ((last - first) / Math.abs(first)) * 100 : 0;
-  return { series: s, values, last, pct };
-}
 
 export default async function HomePage() {
   const [featured, discoveries, media, news, education, expeditions] = await Promise.all([
@@ -66,7 +62,6 @@ export default async function HomePage() {
   const arctic = getEditorialImage('region-arctic', 1600);
   const antarctic = getEditorialImage('region-antarctic', 1600);
 
-  const seaIce = seriesStat('arctic-sea-ice-extent');
   const lead = featured[0];
   const expedition = expeditions[0];
 
@@ -78,21 +73,9 @@ export default async function HomePage() {
         fallback={hero.fallback}
         alt={hero.alt}
         panels={
-          <>
-            <FloatingStat label="Region" value="78° N" sub="Arctic Ocean" />
-            <FloatingStat
-              label="Sea ice extent"
-              value={<AnimatedNumber value={seaIce.last} decimals={1} suffix=" M km²" />}
-              sub="Demonstration dataset"
-              className="[animation-delay:1.2s]"
-            />
-            <FloatingStat
-              label="Research stations"
-              value={<AnimatedNumber value={8} />}
-              sub="Catalogued"
-              className="[animation-delay:2.4s]"
-            />
-          </>
+          <Suspense fallback={<HeroPanelsSkeleton />}>
+            <HeroPanels />
+          </Suspense>
         }
       >
         <div className="max-w-5xl">
@@ -173,21 +156,21 @@ export default async function HomePage() {
           </div>
         </Reveal>
 
-        <Reveal className="mt-16 grid grid-cols-2 gap-px overflow-hidden rounded-card border border-border bg-border sm:grid-cols-4">
-          {[
-            ['Research records', DEMO_COUNTS.research, '+'],
-            ['Researchers', DEMO_COUNTS.researchers, '+'],
-            ['Datasets', DEMO_COUNTS.datasets, '+'],
-            ['Institutions', DEMO_COUNTS.institutions, ''],
-          ].map(([label, n, suffix]) => (
-            <div key={label as string} className="bg-surface p-6">
-              <p className="font-display text-3xl font-medium sm:text-4xl">
-                <AnimatedNumber value={n as number} suffix={suffix as string} />
-              </p>
-              <p className="metadata mt-2">{label as string}</p>
-            </div>
-          ))}
-        </Reveal>
+      </section>
+
+      {/* ─────────────────────── LIVE POLAR SNAPSHOT ─────────────────────── */}
+      <section className="border-t border-border bg-surface">
+        <div className="editorial py-24 sm:py-32">
+          <SectionHeading
+            index="02"
+            kicker="Live Polar Snapshot"
+            title="Where things stand today"
+            lead="Sea-ice figures are the latest monthly mean from the NSIDC Sea Ice Index (refreshed every six hours). Counts are live from this deployment's database."
+          />
+          <Suspense fallback={<LiveSnapshotSkeleton />}>
+            <LiveSnapshot />
+          </Suspense>
+        </div>
       </section>
 
       {/* ─────────────────────── POLAR REGIONS ─────────────────────── */}
@@ -211,10 +194,10 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ─────────────────────── 02 FEATURED RESEARCH ─────────────────────── */}
+      {/* ─────────────────────── 03 FEATURED RESEARCH ─────────────────────── */}
       <section className="editorial py-24 sm:py-36">
         <SectionHeading
-          index="02"
+          index="03"
           kicker="Latest Research"
           title="From the knowledge repository"
           action={<EditorialLink href="/repository">All research</EditorialLink>}
@@ -285,88 +268,15 @@ export default async function HomePage() {
         ) : null}
       </section>
 
-      {/* ─────────────────────── 03 DATA ─────────────────────── */}
-      <section className="bg-polar-navy text-polar-text-light [&_.hairline]:bg-white/15 [&_.eyebrow]:text-polar-glacier">
-        <div className="editorial py-24 sm:py-36">
-          <SectionHeading
-            index="03"
-            kicker="Polar Data"
-            title={<span className="text-white">The ice is moving.</span>}
-            lead={
-              <span className="text-polar-text-muted">
-                Interactive time-series for the polar environment. Every series carries its
-                source, unit and methodology.
-              </span>
-            }
-            action={
-              <EditorialLink href="/data" className="text-polar-glacier hover:text-white">
-                Full data
-              </EditorialLink>
-            }
-          />
-
-          <Reveal className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
-            <div>
-              <p className="metadata text-polar-text-muted">
-                Arctic sea ice extent — latest demo value
-              </p>
-              <p className="mt-4 font-display text-6xl font-medium tracking-tight text-white sm:text-7xl">
-                {seaIce.last}
-                <span className="ml-2 align-top text-2xl text-polar-text-muted">M km²</span>
-              </p>
-              <p className="mt-3 text-sm">
-                <span className={seaIce.pct < 0 ? 'text-polar-glacier' : 'text-warning'}>
-                  {seaIce.pct > 0 ? '+' : ''}
-                  {seaIce.pct.toFixed(1)}%
-                </span>{' '}
-                <span className="text-polar-text-muted">across the demo record</span>
-              </p>
-              <div className="mt-8 inline-flex border border-dashed border-white/25 bg-white/5 px-3 py-2 text-xs font-medium text-polar-glacier">
-                Demo dataset — illustrative values, not a live measurement.
-              </div>
-              <div className="mt-8 flex gap-3">
-                <Button
-                  asChild
-                  variant="outline"
-                  size="sm"
-                  className="border-white/30 text-white hover:bg-white/10 hover:text-white"
-                >
-                  <a href={`/api/data/series/${seaIce.series.id}?format=csv`}>CSV</a>
-                </Button>
-                <Button
-                  asChild
-                  variant="outline"
-                  size="sm"
-                  className="border-white/30 text-white hover:bg-white/10 hover:text-white"
-                >
-                  <a href={`/api/data/series/${seaIce.series.id}?format=json-file`}>JSON</a>
-                </Button>
-              </div>
-            </div>
-            <div className="flex flex-col justify-end text-polar-glacier">
-              <div className="h-56 w-full">
-                <Sparkline points={seaIce.values} strokeClassName="stroke-polar-glacier text-polar-glacier" />
-              </div>
-              <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1">
-                {['Sea Ice', 'Climate', 'Ocean', 'Cryosphere'].map((t) => (
-                  <Link
-                    key={t}
-                    href="/data"
-                    className="metadata text-polar-text-muted transition-colors hover:text-white"
-                  >
-                    {t}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </Reveal>
-        </div>
-      </section>
+      {/* ─────────────────────── 04 POLAR DATA (real NSIDC) ─────────────────────── */}
+      <Suspense fallback={<DataTeaserSkeleton />}>
+        <DataTeaser />
+      </Suspense>
 
       {/* ─────────────────────── 04 MEDIA ─────────────────────── */}
       <section className="editorial py-24 sm:py-36">
         <SectionHeading
-          index="04"
+          index="05"
           kicker="Polar Media"
           title="A visual archive"
           action={<EditorialLink href="/media">Media library</EditorialLink>}
@@ -389,7 +299,7 @@ export default async function HomePage() {
       <section className="border-y border-border bg-surface">
         <div className="editorial py-24 sm:py-36">
           <SectionHeading
-            index="05"
+            index="06"
             kicker="Education & Outreach"
             title="Understand the poles"
             lead="Plain-language explainers, classroom lesson plans, interactive models and quizzes — no account required."
@@ -427,7 +337,7 @@ export default async function HomePage() {
       {expedition ? (
         <section className="editorial py-24 sm:py-36">
           <SectionHeading
-            index="06"
+            index="07"
             kicker="In The Field"
             title="Expedition journals"
             action={<EditorialLink href="/expeditions">All expeditions</EditorialLink>}
@@ -472,7 +382,7 @@ export default async function HomePage() {
       <section className="border-t border-border bg-surface">
         <div className="editorial py-24 sm:py-36">
           <SectionHeading
-            index="07"
+            index="08"
             kicker="News"
             title="From the community"
             action={<EditorialLink href="/news">Newsroom</EditorialLink>}
